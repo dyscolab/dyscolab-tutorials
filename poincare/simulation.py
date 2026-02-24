@@ -13,12 +13,12 @@ async with app.setup(hide_code=True):
         import micropip
 
         await micropip.install(
-            ["typing_extensions>=4.15.0", "poincare>=1.0.0b2", "matplotlib"]
+            ["typing_extensions>=4.15.0", "poincare>=1.0.0b3", "matplotlib"]
         )
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     # Simulation in poincare
     Poincare and SimBio include a number of different options for simulation, including changing solvers and backends, searching for steady states and limit cycles with parameter sweeps and interactive simulation.
@@ -27,7 +27,7 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     ## Using different solvers and backends
     We can change the method used for simulating the system by passing it to the `solve` method. To use Runge-Kutta  of order 4 (5) instead of the default LSODA (SciPy's implementation of Adams/BDF method):
@@ -69,7 +69,7 @@ def _(DampedOscillator, Simulator):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     Currently the implemented methods are: Asams/BDF (LSODA), Runge-Kutta of orders 3(2) (RK32), 4(5) (RK45) and 8 (DOP853), Runge-Kutta method of Radau IIA family of order 5 (Radau), and BDF (BDF). All oft them are wrappers to SciPy's implementation  of the method, see [SciPy's documentation](https://docs.scipy.org/doc/scipy/reference/integrate.html) for more details.
     """)
@@ -77,7 +77,7 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     Poincare also allows the use of diffent backends to compile the systems to, inculuding [NumPy](https://numpy.org/) (by default) [Numba](https://numba.pydata.org/) and [JAX](https://docs.jax.dev/en/latest/):
     """)
@@ -92,7 +92,7 @@ def _(DampedOscillator, Simulator):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     #### In marimo
     """)
@@ -100,7 +100,7 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     ## Interactive simulators
 
@@ -110,7 +110,7 @@ def _(mo):
 
 
 @app.cell
-def _(mo):
+def _():
     slider = mo.ui.slider(start=0, stop=10, step=0.1, value=0.5, label="v(0)")
     slider
     return (slider,)
@@ -125,7 +125,7 @@ def _(DampedOscillator, Simulator, np, slider):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     ### In Jupyter
 

@@ -13,12 +13,12 @@ async with app.setup(hide_code=True):
         import micropip
 
         await micropip.install(
-            ["typing_extensions>=4.15.0", "poincare>=1.0.0b2", "matplotlib"]
+            ["typing_extensions>=4.15.0", "poincare>=1.0.0b3", "matplotlib"]
         )
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     # Asymptotic behaviour in Poincare
     Poincare contains a number of features to  characterize the asymptotic behaviour of the system, including the search for steady states, bistability and limit cycles for different parameter values.
@@ -27,7 +27,7 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     ## Steady States and parameter sweeps
     To find steady states, we must first create an instance of the `SteadyState` class.
@@ -65,7 +65,7 @@ def _():
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     The solver can be changed from the default LSODA by passing a `solver` attribute in a way similar to `Simulator.solve()` (see above). The `SteadyState.solve()` method runs the simulator until it finds a steady states (the derivatives are small enough) or it reaches `t_end`. Since  the default for `t_end` is `np.inf`, not changing it may result in the `Simulator.solve()` running indefinitely.
     """)
@@ -90,7 +90,7 @@ def _(Parameter, Simulator, System, Variable, assign, initial, steady):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     It outputs an [xarray](https://docs.xarray.dev/en/stable/) `Dataset`  with the steady state reached for each variable and the time at which it terminated. `0` in the event column indicates it terminated correctly, if it reaches `t_end` without terminating it outputs `NA`.
     """)
@@ -98,7 +98,7 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     The `SteadyState.sweep()` method allows for parameter sweeps, finding the steady state with each parameter:
     """)
@@ -114,7 +114,7 @@ def _(Pitchfork, np, sim, steady):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     Since `values` only takes the values of the parameter to sweep, changes to initial conditions or values for other parameters in a sweep must be done at simulator creation level:
     """)
@@ -131,7 +131,7 @@ def _(Pitchfork, Simulator, np, steady):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     We can also use `StadyState.sweep_up_and_down()`, which sweeps first up and then down through `values` setting the steady state found in each run as initial conditions for the next.
     """)
@@ -173,7 +173,7 @@ def _(
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     Poincare also allows for the search of bistability with different parameters:
     """)
@@ -189,7 +189,7 @@ def _(BiasedDouble, np, sim_2, steady):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     `SteadyState.bistability()` works by sweeping up and down and checking if the difference between the up and down value is either greater than the absolute tolerance or greater then the sum of the results times the relative tolerance. These can be changed manually by passing `atol` and `rtol` respectively as parameters:
     """)
@@ -209,7 +209,7 @@ def _(BiasedDouble, np, sim_2, steady):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     ## Limit cycle analysis
     If systems seem to stabilize around a limit cycle instead of reaching a steady state, we can use the `Oscillations` class to find it's period and amplitude. By default it uses the [Autoperiod](https://epubs.siam.org/doi/epdf/10.1137/1.9781611972757.40) method with an implementation based on the one in the [Periodicity Detection](https://pypi.org/project/periodicity-detection/) package.
@@ -226,7 +226,7 @@ def _():
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     It allows for parameter sweeps using the `Oscillations.sweep()` method, which takes a simulator for the `System` as its first argument:
     """)
@@ -282,7 +282,7 @@ def _(
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     Besides the simulator, `Oscillations.sweep()` takes the following required keyword arguments:
     - `T_min`/`T_max`: minimum of maximum of range in which periods are expected to be found.
@@ -296,7 +296,7 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     The output is a pandas `DataFrame` which contains period, amplitude and mean quadratic difference between consecutive periods indexed by the swept parameter's value. We can plot the results for period and amplitude:
     """)
@@ -316,7 +316,7 @@ def _(plt, result_3):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     And get an idea of how accurate the estimate is by plotting the mean quadratic difference between periods relative to the amplitude:
     """)
@@ -340,7 +340,7 @@ def _(np, plt, result_3):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     If the method fails to find or confirm a period it will raise warnings:
     """)
@@ -362,7 +362,7 @@ def _(ForcedDampedOscillator, np, osc, sim_3):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     We can try changing the minimum amount of periods it simulates after relaxation `T_after_rel` or the minimum amount of timesteps in  each period `timesteps_in_T` to get a better result:
     """)
@@ -386,7 +386,7 @@ def _(ForcedDampedOscillator, np, osc, sim_3):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     If the System has more than one variable `Oscillations.sweep`, will by default look at all of them, finding a period and amplitude for each:
     """)
@@ -424,7 +424,7 @@ def _(Parameter, Simulator, System, Variable, assign, initial, np, osc):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     Or we can specifically pass a list `variables` specifying which should be considered:
     """)

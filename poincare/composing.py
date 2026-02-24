@@ -13,12 +13,12 @@ async with app.setup(hide_code=True):
         import micropip
 
         await micropip.install(
-            ["typing_extensions>=4.15.0", "poincare>=1.0.0b2", "matplotlib"]
+            ["typing_extensions>=4.15.0", "poincare>=1.0.0b3", "matplotlib"]
         )
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     # Model composition in Poincare
     One of Poincare's key features is being able to make larger models by composing smaller ones. Take as an example an oscillator:
@@ -59,7 +59,7 @@ def _():
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     Which represents the equations:
     $$ \frac{d^2x}{dt^2} = -kx $$
@@ -82,7 +82,7 @@ def _(Derivative, Parameter, System, Variable, assign, initial):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     Which represents the equations:
     $$ \frac{d^2x}{dt^2} = -\gamma\frac{dx}{dt} $$
@@ -118,7 +118,7 @@ def _(
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     Here we are applying the systems to the external variable `x_ext`, adding both equations for it's second derivative:
     $$ \frac{d^2x}{dt^2} = - kx - \gamma \frac{dx}{dt}. $$
@@ -140,7 +140,7 @@ def _(DampedOscillator, Simulator):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     ## Multiple variables
     If we wanted to create a pair of coupled oscillators we can create a Coupling
@@ -168,7 +168,7 @@ def _(Derivative, Parameter, System, Variable, assign, initial):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     And compose it with the damped oscillator class we defined before:
     """)
@@ -213,7 +213,7 @@ def _(
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     And we can run it to get the expected beats:
     """)
@@ -229,7 +229,7 @@ def _(CoupledOscillators, Simulator, np):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     We can easily create larger systems this way; for a chain of 4 coupled oscillators:
     """)
