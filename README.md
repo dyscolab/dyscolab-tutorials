@@ -4,7 +4,7 @@ Tutorials for [dyscolab](https://dyscolab.github.io/) libraries. Uses [pixi](htt
 ```sh
 pixi install
 ```
-to install pixi environment. Tp run 
+to install pixi environment. Run
 ```sh
 pixi run open
 ```
@@ -13,4 +13,4 @@ to open [marimo](https://marimo.io/) launch page in your browser or
 ```sh
 pixi run open [path_to_notebook]
 ```
-to open a specific notebook. They can also be opened in other editors ([see marimo's support](https://docs.marimo.io/guides/editor_features/watching/)), just make sure to choose the "default" environment.
+to open a specific notebook. They can also be opened in other editors ([see marimo's support](https://docs.marimo.io/guides/editor_features/watching/)), just make sure to choose the "default" environment as your kernel.
