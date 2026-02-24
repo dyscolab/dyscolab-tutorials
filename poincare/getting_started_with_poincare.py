@@ -11,9 +11,22 @@ import marimo
 __generated_with = "0.20.2"
 app = marimo.App(width="medium")
 
+async with app.setup(hide_code=True):
+    # Setup cell for marimo notebook, can be ignored
+    import marimo as mo
+    import sys
+
+    # Import packages if running on marimo playground
+    if sys.executable == "/home/pyodide/this.program":
+        import micropip
+
+        await micropip.install(
+            ["typing_extensions>=4.15.0", "poincare>=1.0.0b2", "matplotlib"]
+        )
+
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     # Getting started with Poincare
     Poincare is a python library for declaring and simulating dynamical systems. Designed around the principle of modularity, composability and reproducibility, it's intended to create a layer to separate the actual declaration of models from their simulation, allowing to easily switch methods and backends. It also makes models composable, allowing the combination of smaller systems to create larger ones, and implements a series of analysis tools such as parameter sweeps to find steady states or limit cicles.
@@ -21,11 +34,13 @@ def _(mo):
     return
 
 
-# and makes it easy to extract information (parameters, equations, etc...) from models, encouraging consistency between analytical formulations and numerical implementations.
+@app.cell
+def _():
+    return
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     ## Installation
 
@@ -35,7 +50,7 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     ```
     pip install -U poincare
@@ -45,7 +60,7 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     or conda-forge:
     """)
@@ -53,7 +68,7 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     ```
     conda install -c conda-forge poincare
@@ -63,7 +78,7 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     ## Creating and simultaing a system
     Systems are represented as a subclass of the `System` Class. To create one with equations:
@@ -74,7 +89,7 @@ def _(mo):
 
 
 @app.cell
-def _(mo):
+def _():
     from poincare import System, Variable, initial
 
     class Model(System):
@@ -88,7 +103,7 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     To simulate that system we must create a `Simulator` for it:
     """)
@@ -109,7 +124,7 @@ def _(Model):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     The output is a [xarray](https://docs.xarray.dev/en/stable/) `Dataset`,
     which can be plotted with `to_dataframe().plot()`.
@@ -125,7 +140,7 @@ def _(result):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     We can change the initial conditions by passing a `values` dictionary to `solve`; it is possible to create more than one solution with different initial conditions from the same `Simulator`, avoiding model recompilation.
     """)
@@ -143,7 +158,7 @@ def _(Model, Simulator):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     ## Higher order systems
     To define a higher-order system, we have to explicitly define and assign an initial condition to the derivative of a variable:
@@ -167,7 +182,7 @@ def _(Simulator, System, Variable, initial, np):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     ## Non-autonomous systems
 
@@ -191,7 +206,7 @@ def _(Simulator, System, Variable, initial):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     ## Transforming output
     We can compute transformations of the output
@@ -216,7 +231,7 @@ def _(Oscillator, Simulator, np):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     Note that the output will only save whatever is passed to transform, so the original variables must be explicitly passed in order to be included.
     """)
@@ -224,7 +239,7 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     ## Constants and Parameters
 
@@ -255,7 +270,7 @@ def _(Simulator, System, Variable, initial):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     Now, we can vary their initial conditions jointly:
     """)
@@ -269,7 +284,7 @@ def _(ModelXY, Simulator):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     But we can break that connection by passing `y`'s initial value directly:
     """)
@@ -283,7 +298,7 @@ def _(ModelXY, Simulator):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     ### Parameters
     """)
@@ -291,7 +306,7 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     Parameters are like Variables,
     but their time evolution is given directly as a function of time,
@@ -320,7 +335,7 @@ def _(Simulator, System, Variable, assign, initial):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     ## Functions
     Symbolite functions are accessible from the `symbolite.real` module:
@@ -343,7 +358,7 @@ def _(Parameter, Simulator, System, Variable, assign, initial):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     Note how `F` is a function of `x`. Parameters which depend on variables cannot be changed after model compilation:
     """)
@@ -364,7 +379,7 @@ def _(ParametrizedForce, Simulator, real):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     Instead we must recompile the model with the new value:
     """)
@@ -380,7 +395,7 @@ def _(ParametrizedForce, Simulator, real):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     ## Units
 
@@ -408,7 +423,7 @@ def _(Derivative, Parameter, Simulator, System, Variable, assign, initial):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     The columns have units of `m` and `m/s`, respectively.
     `pint` raises a `DimensionalityError` if we try to add them:
@@ -428,7 +443,7 @@ def _(result_3):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     We can remove the units with:
     """)
@@ -442,27 +457,11 @@ def _(result_3):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     which allows to plot the DataFrame with `.plot()`.
     """)
     return
-
-
-@app.cell
-def _():
-    # Setup cell for marimo notebook, can be ignored
-    import marimo as mo
-    import sys
-
-    # Import packages if running on mairmo playground
-    if sys.executable == "/home/pyodide/this.program":
-        import micropip
-
-        await micropip.install(
-            ["typing_extensions>=4.15.0", "poincare>=1.0.0b2", "matplotlib"]
-        )
-    return (mo,)
 
 
 if __name__ == "__main__":

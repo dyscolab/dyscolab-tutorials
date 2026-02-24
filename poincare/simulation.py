@@ -3,6 +3,19 @@ import marimo
 __generated_with = "0.20.2"
 app = marimo.App(width="medium")
 
+async with app.setup(hide_code=True):
+    # Setup cell for marimo notebook, can be ignored
+    import marimo as mo
+    import sys
+
+    # Import packages if running on marimo playground
+    if sys.executable == "/home/pyodide/this.program":
+        import micropip
+
+        await micropip.install(
+            ["typing_extensions>=4.15.0", "poincare>=1.0.0b2", "matplotlib"]
+        )
+
 
 @app.cell(hide_code=True)
 def _(mo):
@@ -127,22 +140,6 @@ def _(DampedOscillator, Simulator, np):
         save_at=np.linspace(0, 10, 100), values={DampedOscillator.k: (0, 10, 0.1)}
     )
     return
-
-
-@app.cell
-def _():
-    # Setup cell for marimo notebook, can be ignored
-    import marimo as mo
-    import sys
-
-    # Import packages if running on mairmo playground
-    if sys.executable == "/home/pyodide/this.program":
-        import micropip
-
-        await micropip.install(
-            ["typing_extensions>=4.15.0", "poincare>=1.0.0b2", "matplotlib"]
-        )
-    return (mo,)
 
 
 if __name__ == "__main__":
