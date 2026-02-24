@@ -5,14 +5,19 @@ name = "dyscolab-tutorials"
 platforms = ["win-64"]
 version = "0.1.0"
 
-[tasks]
+[tasks.open]
+args = ["path"]
+cmd = "marimo edit --no-sandbox {{path}}"
+
+[dependencies]
+numpy = ">=2.4.2"
+matplotlib = "*"
+ipykernel = "*"
+ipywidgets = "*"
+marimo = ">=0.20.2"
+pyzmq = ">=27.1.0"
 
 [pypi-dependencies]
 symbolite = ">=1.0.0"
 poincare = ">=1.0.0b2"
 simbio = ">= 1.0.0b0"
-
-[dependencies]
-matplotlib = "*"
-marimo = "*"
-pyzmq = "*"
