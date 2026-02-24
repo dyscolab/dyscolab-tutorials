@@ -444,7 +444,8 @@ def _():
     # Import packages if running on mairmo playground
     if sys.executable == "/home/pyodide/this.program":
         import micropip
-        micropip.install("poincare>=1.0.0b2")
+
+        await micropip.install(["typing_extensions>=4.15.0", "poincare>=1.0.0b2"])
     return (mo,)
 
 
