@@ -1,0 +1,18 @@
+[workspace]
+authors = ["Oliverio Starosta <oliveriostarosta@gmail.com>"]
+channels = ["conda-forge"]
+name = "dyscolab-tutorials"
+platforms = ["win-64"]
+version = "0.1.0"
+
+[tasks]
+
+[pypi-dependencies]
+symbolite = ">=1.0.0"
+poincare = ">=1.0.0b2"
+simbio = ">= 1.0.0b0"
+
+[dependencies]
+matplotlib = "*"
+marimo = "*"
+pyzmq = "*"
