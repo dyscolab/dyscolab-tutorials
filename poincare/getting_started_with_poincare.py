@@ -74,7 +74,7 @@ def _(mo):
 
 
 @app.cell
-def _():
+def _(mo):
     from poincare import System, Variable, initial
 
     class Model(System):
