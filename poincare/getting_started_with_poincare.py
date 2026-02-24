@@ -459,7 +459,9 @@ def _():
     if sys.executable == "/home/pyodide/this.program":
         import micropip
 
-        await micropip.install(["typing_extensions>=4.15.0", "poincare>=1.0.0b2"])
+        await micropip.install(
+            ["typing_extensions>=4.15.0", "poincare>=1.0.0b2", "matplotlib"]
+        )
     return (mo,)
 
 
