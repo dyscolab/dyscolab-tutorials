@@ -6,8 +6,9 @@ platforms = ["win-64"]
 version = "0.1.0"
 
 [tasks.open]
-args = ["path"]
+args = [{ "arg" = "path", "default" = "" }]
 cmd = "marimo edit --no-sandbox {{path}}"
+
 
 [dependencies]
 numpy = ">=2.4.2"
