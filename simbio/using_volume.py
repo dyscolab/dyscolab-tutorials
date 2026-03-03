@@ -13,7 +13,7 @@ async with app.setup(hide_code=True):
         import micropip
 
         await micropip.install(
-            ["typing_extensions>=4.15.0", "simbio>=1.0.0b1", "matplotlib"]
+            ["typing_extensions>=4.15.0", "simbio>=1.0.1", "matplotlib"]
         )
 
 
@@ -29,8 +29,9 @@ def _():
 @app.cell
 def _():
     import numpy as np
-    from simbio import Compartment, System, Parameter, Species, RateLaw, MassAction, AbsoluteRateLaw, Simulator, Constant, assign
-    from simbio.core import volume, Volume, concentration, amount
+    from simbio import Compartment, System, Parameter, Species, RateLaw, MassAction, AbsoluteRateLaw, Simulator, Constant, assign, amount, concentration, volume, Volume
+
+
     import pint 
     u = pint.UnitRegistry()
 

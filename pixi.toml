@@ -21,4 +21,4 @@ pyzmq = ">=27.1.0"
 [pypi-dependencies]
 symbolite = ">=1.0.0"
 poincare = ">=1.0.0b3"
-simbio = ">= 1.0.0b1"
+simbio = ">= 1.0.1"

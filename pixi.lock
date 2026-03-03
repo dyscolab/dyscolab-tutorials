@@ -160,10 +160,10 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/ab/88/550d41e81e6d43335603a960cd9c75c1d88f9cf01bc9d4ee8e86290aba7d/pint-0.25.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/97/19/5af93cae70c2e42f3ac568906f8f3909174450bdbf4d70ec420e1daef816/Pint_Pandas-0.7.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/23/12/0e888c6c114589d8d32d30525d77dbf9cd5c2811a37bfa61748bf412ed6d/pint_xarray-0.6.0-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/bd/af/bbd56bfd9ba0c4019c230746c44fe360cab16885ea54224520ed9ff1ce3f/poincare-1.0.0b3-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/0e/2b/0321cbe34f6327f59ef13e114e932df0a52af3dd389f312e6064819f9392/poincare-1.0.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/4b/39/f0e8ea762a764a9dc52aa7dabcfad51a354819de1f0d4652b6a1122424d6/scipy-1.17.1-cp314-cp314-win_amd64.whl
       - pypi: https://files.pythonhosted.org/packages/6f/f5/0538ca92fd0bf53e2c6cb997bd19285e0ffc12afc9193abd831423279435/scipy_events-0.4.4-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/14/71/cbc665e559b935dd18b78c3f3c1a4b892ec76088744e7c8afa56f8ee363d/simbio-1.0.0b1-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/1d/f3/5aebcaca5adc608157908e2f7eb72eaf180e60c26f276cab7d19fc1ef21f/simbio-1.0.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/26/33/f1652d0c59fa51de18492ee2345b65372550501ad061daa38f950be390b6/statsmodels-0.14.6-cp314-cp314-win_amd64.whl
       - pypi: https://files.pythonhosted.org/packages/c8/1a/fbd7473c21cfbbc56e16e8b90212cd656d6d1c880f4396f1ef96f921c7c8/symbolite-1.0.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/40/44/4a5f08c96eb108af5cb50b41f76142f0afa346dfa99d5296fe7202a11854/tabulate-0.9.0-py3-none-any.whl
@@ -1812,10 +1812,10 @@ packages:
   - pkg:pypi/platformdirs?source=compressed-mapping
   size: 25643
   timestamp: 1771233827084
-- pypi: https://files.pythonhosted.org/packages/bd/af/bbd56bfd9ba0c4019c230746c44fe360cab16885ea54224520ed9ff1ce3f/poincare-1.0.0b3-py3-none-any.whl
+- pypi: https://files.pythonhosted.org/packages/0e/2b/0321cbe34f6327f59ef13e114e932df0a52af3dd389f312e6064819f9392/poincare-1.0.0-py3-none-any.whl
   name: poincare
-  version: 1.0.0b3
-  sha256: 04001528a9fbd085fcff04146ec5e657834fa33596bf2cdca54d9f39c5d5381d
+  version: 1.0.0
+  sha256: 3e407bec06e19f47e70619a9ef990aeb759c0d327c3665d732baf92a747a7032
   requires_dist:
   - numpy
   - pandas
@@ -2146,12 +2146,12 @@ packages:
   - numpy
   - scipy
   requires_python: '>=3.10'
-- pypi: https://files.pythonhosted.org/packages/14/71/cbc665e559b935dd18b78c3f3c1a4b892ec76088744e7c8afa56f8ee363d/simbio-1.0.0b1-py3-none-any.whl
+- pypi: https://files.pythonhosted.org/packages/1d/f3/5aebcaca5adc608157908e2f7eb72eaf180e60c26f276cab7d19fc1ef21f/simbio-1.0.1-py3-none-any.whl
   name: simbio
-  version: 1.0.0b1
-  sha256: 59d5f4f7f89df3c1d7dec7301fe4c22d4b3413043a7d07340b0411039ca59642
+  version: 1.0.1
+  sha256: f8f8faded6509d97804f4b73b4974cabdd55ab9d7c6288db363ed676a2b6d9ac
   requires_dist:
-  - poincare>=1.0.0b3
+  - poincare>=1.0.0
   - biomodels ; extra == 'io'
   - python-libsbml ; extra == 'io'
   requires_python: '>=3.12'
