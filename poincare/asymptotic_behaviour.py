@@ -82,7 +82,7 @@ def _(Parameter, Simulator, System, Variable, assign, initial, steady):
 
         eq = x.derive() << r * x - x**3
 
-    # Create a Simulator for Bistable
+    # Create a Simulator for Pitchfork
     sim = Simulator(Pitchfork)
     # Find steady state
     steady.solve(sim, values={Pitchfork.r: 2})
