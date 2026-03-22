@@ -5,10 +5,12 @@ name = "dyscolab-tutorials"
 platforms = ["win-64"]
 version = "0.1.0"
 
+[tasks]
+update-dependencies = "pixi run python set_dependencies.py"
+
 [tasks.open]
 args = [{ "arg" = "path", "default" = "" }]
 cmd = "marimo edit --no-sandbox {{path}}"
-
 
 [dependencies]
 numpy = ">=2.4.2"

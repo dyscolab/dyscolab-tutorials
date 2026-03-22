@@ -1,0 +1,36 @@
+# File to set dependencies in setup cells in marimo noteboks for when they run 
+# in the marimo playground. Fromat dependencies:
+# [group-name]
+# dependencies = [dependencies as would be passed to micropip.install]
+# files = [relative paths to files]
+# and run:
+# pixi run update-dependencies
+# to update them in the files
+
+[base-poincare]
+dependencies = [
+    "pint_pandas<=0.7",
+    "typing_extensions>=4.15.0",
+    "poincare>=1.0.0b3",
+    "matplotlib",
+]
+files = [
+    "poincare/asymptotic_behaviour.py",
+    "poincare/composing.py",
+    "poincare/getting_started_with_poincare.py",
+    "poincare/getting_started_with_poincare.py",
+    "poincare/simulation.py",
+]
+
+[base-simbio]
+dependencies = [
+    "pint_pandas<=0.7",
+    "typing_extensions>=4.15.0",
+    "simbio>=1.0.1",
+    "matplotlib",
+]
+files = [
+    "simbio/getting_started_with_simbio.py",
+    "simbio/repressilator.py",
+    "simbio/using_volume.py",
+]
