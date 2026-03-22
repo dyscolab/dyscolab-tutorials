@@ -13,7 +13,7 @@ async with app.setup(hide_code=True):
         import micropip
 
         await micropip.install(
-            ["typing_extensions>=4.15.0", "simbio>=1.0.1", "matplotlib"]
+            ["pint_pandas<=0.7", "typing_extensions>=4.15.0", "simbio>=1.0.1", "matplotlib"], verbose = False
         )
 
 
