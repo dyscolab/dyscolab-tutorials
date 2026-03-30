@@ -1,6 +1,13 @@
+# /// script
+# requires-python = ">=3.14"
+# dependencies = [
+#     "marimo>=0.21.1",
+# ]
+# ///
+
 import marimo
 
-__generated_with = "0.20.2"
+__generated_with = "0.21.1"
 app = marimo.App(width="medium")
 
 async with app.setup(hide_code=True):
@@ -13,7 +20,13 @@ async with app.setup(hide_code=True):
         import micropip
 
         await micropip.install(
-            ["pint_pandas<=0.7", "typing_extensions>=4.15.0", "poincare>=1.0.0b3", "matplotlib"], verbose = False
+            [
+                "pint_pandas<=0.7",
+                "typing_extensions>=4.15.0",
+                "poincare>=1.0.0b3",
+                "matplotlib",
+            ],
+            verbose=False,
         )
 
 
