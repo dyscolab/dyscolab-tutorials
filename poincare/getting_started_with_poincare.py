@@ -8,7 +8,7 @@
 
 import marimo
 
-__generated_with = "0.20.2"
+__generated_with = "0.21.1"
 app = marimo.App(width="medium")
 
 async with app.setup(hide_code=True):
@@ -21,7 +21,13 @@ async with app.setup(hide_code=True):
         import micropip
 
         await micropip.install(
-            ["pint_pandas<=0.7", "typing_extensions>=4.15.0", "poincare>=1.0.0b3", "matplotlib"], verbose = False
+            [
+                "pint_pandas<=0.7",
+                "typing_extensions>=4.15.0",
+                "poincare>=1.0.0b3",
+                "matplotlib",
+            ],
+            verbose=False,
         )
 
 
@@ -331,7 +337,7 @@ def _(Simulator, System, Variable, assign, initial):
     Simulator(ParametrizedDecay).solve(
         save_at=range(3), values={ParametrizedDecay.p: 2}
     )
-    return (Parameter,)
+    return Parameter, ParametrizedDecay
 
 
 @app.cell(hide_code=True)
@@ -349,9 +355,9 @@ def _(Parameter, Simulator, System, Variable, assign, initial):
 
     class ParametrizedForce(System):
         x: Variable = initial(default=1)
-        F: Parameter = assign(default=real.sin(x))
+        Force: Parameter = assign(default=real.sin(x))
 
-        eq = x.derive() << F
+        eq = x.derive() << Force
 
     Simulator(ParametrizedForce).solve(save_at=range(3))
     return ParametrizedForce, real
@@ -370,7 +376,7 @@ def _(ParametrizedForce, Simulator, real):
     try:
         Simulator(ParametrizedForce).solve(
             save_at=range(3),
-            values={ParametrizedForce.F: real.cos(ParametrizedForce.x)},
+            values={ParametrizedForce.Force: real.cos(ParametrizedForce.x)},
         )
     except ValueError as ve:
         # Poincare Raises a ValueError when the functional dependece of a parameter is changed
@@ -388,9 +394,51 @@ def _():
 
 @app.cell
 def _(ParametrizedForce, Simulator, real):
-    # crate a new simulator with the new formula for `F`
-    new_sim = Simulator(ParametrizedForce(F=real.cos(ParametrizedForce.x)))
+    # create a new simulator with the new formula for Force
+    new_sim = Simulator(ParametrizedForce(Force=real.cos(ParametrizedForce.x)))
     new_sim.solve(save_at=range(3))
+    return
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""
+    ## Model Reports
+    Aside for its use in simulation, Poincare is meant to be a centralized for source for all information concerning the system. To ensure consistency between analytical formulations and numerical implementations, we can use the `model_report()` function to generate LaTeX code for a report with all relevant model data (equations, variables and parameters):
+    """)
+    return
+
+
+@app.cell
+def _(ParametrizedForce):
+    from poincare import model_report
+
+    print(model_report(ParametrizedForce))
+    return (model_report,)
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""
+    instead of printing the output a file path can be passed for `model_report()` to write on:
+    """)
+    return
+
+
+@app.cell
+def _(ParametrizedDecay, model_report):
+    model_report(ParametrizedDecay,path="Parametrized_Decay_report.tex")
+    return
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""
+    There are also three additional arguments to control how the report is generated:
+    - `standalone`: decides wether it should compile as a standalone document (by including headers such as "\documentclass", "\begin{document}") or is meant to be added to a an existing document; when a path is passed it also controls if it overwrites existing contents (if `True`) or it appends (if `False`). It is `True` by default.
+    - `transform`: a dictionary {component: latex expression} to replace the name of certain components. E.g.: ``` transform = {ParametrizedForce.Force: "F"}``` replaces "Force" for "F" in the report.
+    - `replace_algebraics`: whether to replace parameters that depend on other parameters and variables for their expressions in dependence or leave them es is, is is `False` by default. E.g.: passing `replace_algebracis = True` replaces "Force" with "sin(t)" in the report.
+    """)
     return
 
 

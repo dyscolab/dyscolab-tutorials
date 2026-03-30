@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.20.2"
+__generated_with = "0.21.1"
 app = marimo.App(width="medium")
 
 async with app.setup(hide_code=True):

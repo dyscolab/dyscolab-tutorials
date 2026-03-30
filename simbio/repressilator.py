@@ -13,7 +13,13 @@ async with app.setup(hide_code=True):
         import micropip
 
         await micropip.install(
-            ["pint_pandas<=0.7", "typing_extensions>=4.15.0", "simbio>=1.0.1", "matplotlib"], verbose = False
+            [
+                "pint_pandas<=0.7",
+                "typing_extensions>=4.15.0",
+                "simbio>=1.0.1",
+                "matplotlib",
+            ],
+            verbose=False,
         )
 
 
@@ -67,7 +73,6 @@ def _():
     )
     from simbio.reactions.single import Destruction
 
-
     class mRNA(System):
         # Create the species
         m: Variable = initial(default=1)
@@ -83,7 +88,6 @@ def _():
         destroy = Destruction(A=m, rate=1)
 
         create = RateLaw(reactants=[p], products=[m, p], rate_law=creation_rate)
-
 
     sim = Simulator(mRNA)
     result = sim.solve(save_at=np.linspace(0, 10, 1000))
@@ -125,7 +129,9 @@ def _(Parameter, RateLaw, Simulator, System, Variable, assign, initial, np):
         p: Variable = initial(default=0)
         beta: Parameter = assign(default=1)
 
-        create = RateLaw(reactants=[p, m], products=[2 * p, m], rate_law=-beta * (p - m))
+        create = RateLaw(
+            reactants=[p, m], products=[2 * p, m], rate_law=-beta * (p - m)
+        )
 
     sim_1 = Simulator(Protein)  # Create parameter beta
     result_1 = sim_1.solve(save_at=np.linspace(0, 10, 1000))
@@ -160,7 +166,7 @@ def _(Parameter, Protein, System, Variable, assign, initial, mRNA):
         p2: Variable = initial(default=1)
         p3: Variable = initial(default=1)
 
-        # Create all the paremeters
+        # Create all the parameters
         alpha: Parameter = assign(default=150)
         alpha_0: Parameter = assign(default=0.5)
         n: Parameter = assign(default=2)
@@ -188,25 +194,21 @@ def _():
 @app.cell
 def _(Parameter, Protein, System, assign, mRNA):
     class EfficientRepressilator(System):
-    
         # Create all the paremeters
         alpha: Parameter = assign(default=150)
         alpha_0: Parameter = assign(default=0.5)
         n: Parameter = assign(default=2)
         beta: Parameter = assign(default=8)
-    
+
         # Create the protein reactions
         syst1 = Protein(beta=beta)
         syst2 = Protein(beta=beta)
         syst3 = Protein(beta=beta)
 
-
-
         # Apply the creation and destruction laws for the mRNA
         react_1 = mRNA(m=syst1.m, p=syst3.p, alpha=alpha, alpha_0=alpha_0, n=n)
         react_2 = mRNA(m=syst2.m, p=syst1.p, alpha=alpha, alpha_0=alpha_0, n=n)
         react_3 = mRNA(m=syst3.m, p=syst2.p, alpha=alpha, alpha_0=alpha_0, n=n)
-
 
     return (EfficientRepressilator,)
 
@@ -222,10 +224,10 @@ def _():
 @app.cell
 def _(EfficientRepressilator, Repressilator, Simulator, np, plt):
     sim_2 = Simulator(Repressilator)
-    sim_2.solve(save_at=np.linspace(0, 10, 100)).to_dataframe().plot(title = "Normal")
+    sim_2.solve(save_at=np.linspace(0, 10, 100)).to_dataframe().plot(title="Normal")
     plt.show()
     sim_3 = Simulator(EfficientRepressilator)
-    sim_3.solve(save_at=np.linspace(0, 10, 100)).to_dataframe().plot(title = "Effiecient")
+    sim_3.solve(save_at=np.linspace(0, 10, 100)).to_dataframe().plot(title="Effiecient")
     plt.show()
     return (sim_2,)
 
@@ -240,7 +242,19 @@ def _():
 
 @app.cell
 def _(Repressilator, np, sim_2):
-    sim_2.solve(save_at=np.linspace(0, 100, 1000), values={Repressilator.m1: 1, Repressilator.m2: 2, Repressilator.m3: 3, Repressilator.p1: 4, Repressilator.p2: 5, Repressilator.p3: 6, Repressilator.alpha: 200, Repressilator.beta: 5}).to_dataframe().plot()
+    sim_2.solve(
+        save_at=np.linspace(0, 100, 1000),
+        values={
+            Repressilator.m1: 1,
+            Repressilator.m2: 2,
+            Repressilator.m3: 3,
+            Repressilator.p1: 4,
+            Repressilator.p2: 5,
+            Repressilator.p3: 6,
+            Repressilator.alpha: 200,
+            Repressilator.beta: 5,
+        },
+    ).to_dataframe().plot()
     return
 
 
@@ -257,18 +271,23 @@ def _():
 @app.cell
 def _(Repressilator, Simulator, np):
     from poincare import Oscillations
+
     sim2 = Simulator(Repressilator(m1=1, m2=2, m3=3, p1=1, p2=2, p3=3, alpha=200))
     # Default inital conditions and values can also be changed at from Simulator creation
     osc = Oscillations()
-    result_2 = osc.sweep(sim2, 
-                         rel_time=60, # Estimated upper bound on relaxation time
-                         T_min=1, # Minimum period expected
-                         T_max=20, # Maximum period expected
-                         variables=Repressilator.m1, # Variable to look at, can be an iterable with multiple variables
-                         parameter=Repressilator.beta, 
-                         values=np.linspace(5, 20, 15))
+    result_2 = osc.sweep(
+        sim2,
+        rel_time=60,  # Estimated upper bound on relaxation time
+        T_min=1,  # Minimum period expected
+        T_max=20,  # Maximum period expected
+        variables=Repressilator.m1,  # Variable to look at, can be an iterable with multiple variables
+        parameter=Repressilator.beta,
+        values=np.linspace(5, 20, 15),
+    )
 
-    result_2.sel(quantity = "period").to_dataframe().plot(style='--.')         # Parameter to sweep  # Values taken on by parameter
+    result_2.sel(quantity="period").to_dataframe().plot(
+        style="--."
+    )  # Parameter to sweep  # Values taken on by parameter
     return (result_2,)
 
 
@@ -282,8 +301,8 @@ def _():
 
 @app.cell
 def _(result_2):
-    result_2.sel(quantity = ["amplitude"]).to_dataarray().plot(marker = ".")
-    result_2.sel(quantity = ["difference_rms"]).to_dataarray().plot(marker = ".")
+    result_2.sel(quantity=["amplitude"]).to_dataarray().plot(marker=".")
+    result_2.sel(quantity=["difference_rms"]).to_dataarray().plot(marker=".")
 
     return
 
