@@ -34,3 +34,13 @@ files = [
     "simbio/repressilator.py",
     "simbio/using_volume.py",
 ]
+
+[simbio-rebop]
+dependencies = [
+    "pint_pandas<=0.7",
+    "typing_extensions>=4.15.0",
+    "simbio>=1.0.1",
+    "matplotlib",
+    "rebop",
+]
+files = ["simbio/stochastic.py"]

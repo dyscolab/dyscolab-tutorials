@@ -12,6 +12,10 @@ update-dependencies = "pixi run python set_dependencies.py"
 args = [{ "arg" = "path", "default" = "" }]
 cmd = "marimo edit --no-sandbox {{path}}"
 
+[environments]
+default = ["pypi"]
+local = ["local"]
+
 [dependencies]
 numpy = ">=2.4.2"
 matplotlib = "*"
@@ -19,8 +23,17 @@ ipykernel = "*"
 ipywidgets = "*"
 marimo = ">=0.20.2"
 pyzmq = ">=27.1.0"
+seaborn = "*"
 
 [pypi-dependencies]
+rebop = "*"
+
+[feature.pypi.pypi-dependencies]
 symbolite = ">=1.0.0"
 poincare = ">=1.0.0b3"
 simbio = ">= 1.0.1"
+
+[feature.local.pypi-dependencies]
+# symbolite = { path = "../u2602/symbolite", editable = true }
+# poincare = { path = "../u2602/poincare", editable = true }
+# simbio = { path = "../u2602/simbio", editable = true }
