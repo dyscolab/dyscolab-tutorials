@@ -18,6 +18,7 @@ async with app.setup(hide_code=True):
                 "typing_extensions>=4.15.0",
                 "simbio>=1.0.1",
                 "matplotlib",
+                "seaborn",
             ],
             verbose=False,
         )
@@ -27,7 +28,11 @@ async with app.setup(hide_code=True):
 def _():
     mo.md(r"""
     # Stochastic simulations in SimBio
-    Simbio contains the capability to stochastically simulate systems using the [Gillespie algorithm](http://en.wikipedia.org/wiki/Gillespie_algorithm); this is preferable over ODE based simulations for reactions where small amounts of reactantas are present. Given a System:
+    Simbio contains the capability to stochastically simulate systems using the [Gillespie algorithm](http://en.wikipedia.org/wiki/Gillespie_algorithm); this is preferable over ODE based simulations for reactions where small amounts of reactants are present. Simbio uses the [rebop](https://rebop.readthedocs.io/en/latest/) library for this, which must be installed separately:
+    ```bash
+    pip install rebop
+    ```
+    To stochastically simulate a `System`, which we can define noramlly:
     """)
     return
 
@@ -60,7 +65,7 @@ def _():
 @app.cell
 def _(Infection, RebopSimulator):
     rebsim = RebopSimulator(Infection)
-    result = rebsim.solve(n_points=1000, upto_t=10)
+    result = rebsim.solve(n_points=100, upto_t=10)
     result.to_dataframe().plot()
     return rebsim, result
 
@@ -68,21 +73,21 @@ def _(Infection, RebopSimulator):
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    Unlike the regular `Simulator.solve()` which takes an iterable of times to `save_at`, `RebopSimulator.solve()` takes argumentes `upto_t` to control simulation end time and `n_points` which decides how many equally spaced times are sampled. Since it doesn't count 0, `n_points` = N will a `Dataset` with a N + 1 size time coordinate:
+    Unlike the regular `Simulator.solve()` which takes an iterable of times to `save_at`, `RebopSimulator.solve()` takes arguments `upto_t` to control simulation end time and `n_points` which decides how many equally spaced times are sampled. Since it doesn't count 0, `n_points` = N will a `Dataset` with a N + 1 size time coordinate:
     """)
     return
 
 
 @app.cell
 def _(result):
-    result.coords["time"]
+    len(result.coords["time"])
     return
 
 
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    To manually set a seed, we must pass it to the `rng` argunent:
+    To manually set a seed, we must pass it to the `rng` argument:
     """)
     return
 
@@ -96,7 +101,7 @@ def _(rebsim):
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    Of course, since the simulation is stochatic the result will be different every time its run. We can run it many times to get a better idea of the system's behaviour:
+    Of course, since the simulation is stochastic the result will be different every time its run. We can run it many times to get a better idea of the system's behaviour:
     """)
     return
 
@@ -116,7 +121,9 @@ def _(rebsim, xr):
         .reset_index()
     )
     df_100
-    so.Plot(df_100, x="time", y="value", color="variable", group="seed").add(so.Lines()).show()
+    so.Plot(df_100, x="time", y="value", color="variable", group="seed").add(
+        so.Lines()
+    ).show()
     return
 
 
@@ -132,13 +139,15 @@ def _():
 @app.cell
 def _(RateLaw, RebopSimulator, System, Variable, initial):
     from symbolite import real
-    class Model(System):
-        A: Variable = initial(default = 100)
-        B: Variable = initial(default = 1)
 
-        r = RateLaw(reactants = [A], products = [B], rate_law = real.sqrt(A)+1)
+    class Model(System):
+        A: Variable = initial(default=100)
+        B: Variable = initial(default=1)
+
+        r = RateLaw(reactants=[A], products=[B], rate_law=real.sqrt(A) + 1)
+
     rebsim_2 = RebopSimulator(Model)
-    rebsim_2.solve(n_points=10, upto_t=1)
+    rebsim_2.solve(n_points=50, upto_t=1).to_dataframe().plot()
     return
 
 

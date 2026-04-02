@@ -41,6 +41,6 @@ dependencies = [
     "typing_extensions>=4.15.0",
     "simbio>=1.0.1",
     "matplotlib",
-    "rebop",
+    "seaborn",
 ]
 files = ["simbio/stochastic.py"]

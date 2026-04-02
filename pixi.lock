@@ -171,7 +171,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/c7/fb/b9c6d0fc586104288adb41da22b7dbd9756a8508ee62b0854516cc87f5a4/rebop-0.9.7-cp314-cp314-win_amd64.whl
       - pypi: https://files.pythonhosted.org/packages/6f/f5/0538ca92fd0bf53e2c6cb997bd19285e0ffc12afc9193abd831423279435/scipy_events-0.4.4-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/1d/f3/5aebcaca5adc608157908e2f7eb72eaf180e60c26f276cab7d19fc1ef21f/simbio-1.0.1-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/c8/1a/fbd7473c21cfbbc56e16e8b90212cd656d6d1c880f4396f1ef96f921c7c8/symbolite-1.0.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/51/9d/d580ae9bf9ce130102228215dc85aad5ba055ad78218057246b583f44fc5/symbolite-1.1.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/40/44/4a5f08c96eb108af5cb50b41f76142f0afa346dfa99d5296fe7202a11854/tabulate-0.9.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/99/92/545eb2ca17fc0e05456728d7e4378bfee48d66433ae3b7e71948e46826fb/xarray-2026.2.0-py3-none-any.whl
   local:
@@ -336,8 +336,18 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/zipp-3.23.0-pyhcf101f3_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zlib-ng-2.3.3-h0261ad2_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstd-1.5.7-h534d264_6.conda
+      - pypi: https://files.pythonhosted.org/packages/27/cd/c883e1a7c447479d6e13985565080e3fea88ab5a107c21684c813dba1875/flexcache-0.3-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/fe/5e/3be305568fe5f34448807976dc82fc151d76c3e0e03958f34770286278c1/flexparser-0.4-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/1b/dd/a9fe6a0a09512da23951c68bf36466aeecd89def3183dc095edbc807ddc5/pint-0.25.3-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/0a/ac/c71db56079a5966ea365d29be0dafee6fd5ab9b8c7914b6507bc1a179134/pint_pandas-0.8.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/f4/0d/e20fbbf036a88fc7be7438f6fc1c7606e8806064f933f7eb6d4f110bc622/pint_xarray-0.6.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/c7/fb/b9c6d0fc586104288adb41da22b7dbd9756a8508ee62b0854516cc87f5a4/rebop-0.9.7-cp314-cp314-win_amd64.whl
+      - pypi: https://files.pythonhosted.org/packages/6f/f5/0538ca92fd0bf53e2c6cb997bd19285e0ffc12afc9193abd831423279435/scipy_events-0.4.4-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/99/55/db07de81b5c630da5cbf5c7df646580ca26dfaefa593667fc6f2fe016d2e/tabulate-0.10.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/99/92/545eb2ca17fc0e05456728d7e4378bfee48d66433ae3b7e71948e46826fb/xarray-2026.2.0-py3-none-any.whl
+      - pypi: ../u2602/poincare
+      - pypi: ../u2602/simbio
+      - pypi: ../u2602/symbolite
 packages:
 - conda: https://conda.anaconda.org/conda-forge/win-64/_openmp_mutex-4.5-20_gnu.conda
   build_number: 20
@@ -2316,6 +2326,68 @@ packages:
   - uncertainties>=3.1.6 ; extra == 'uncertainties'
   - xarray ; extra == 'xarray'
   requires_python: '>=3.11'
+- pypi: https://files.pythonhosted.org/packages/1b/dd/a9fe6a0a09512da23951c68bf36466aeecd89def3183dc095edbc807ddc5/pint-0.25.3-py3-none-any.whl
+  name: pint
+  version: 0.25.3
+  sha256: 27eb25143bd5de9fcc4d5a4b484f16faf6b4615aa93ece6b3373a8c1a3c1b97d
+  requires_dist:
+  - flexcache>=0.3
+  - flexparser>=0.4
+  - platformdirs>=2.1.0
+  - typing-extensions>=4.0.0
+  - babel<=2.8 ; extra == 'all'
+  - dask<2025.3.0 ; extra == 'all'
+  - matplotlib ; extra == 'all'
+  - numpy>=1.23 ; extra == 'all'
+  - pint-pandas>=0.3 ; extra == 'all'
+  - scipy ; extra == 'all'
+  - uncertainties>=3.1.6 ; extra == 'all'
+  - xarray ; extra == 'all'
+  - babel<=2.8 ; extra == 'babel'
+  - pytest ; extra == 'codspeed'
+  - pytest-benchmark ; extra == 'codspeed'
+  - pytest-codspeed ; extra == 'codspeed'
+  - pytest-cov ; extra == 'codspeed'
+  - pytest-mpl ; extra == 'codspeed'
+  - pytest-subtests ; extra == 'codspeed'
+  - dask<2025.3.0 ; extra == 'dask'
+  - babel ; extra == 'docs'
+  - commonmark==0.8.1 ; extra == 'docs'
+  - currencyconverter ; extra == 'docs'
+  - docutils ; extra == 'docs'
+  - graphviz ; extra == 'docs'
+  - ipykernel ; extra == 'docs'
+  - ipython<=8.12 ; extra == 'docs'
+  - jupyter-client ; extra == 'docs'
+  - nbsphinx ; extra == 'docs'
+  - pooch ; extra == 'docs'
+  - pygments>=2.4 ; extra == 'docs'
+  - recommonmark==0.5.0 ; extra == 'docs'
+  - sciform ; extra == 'docs'
+  - scipy ; extra == 'docs'
+  - serialize ; extra == 'docs'
+  - sparse ; extra == 'docs'
+  - sphinx-book-theme>=1.1.0 ; extra == 'docs'
+  - sphinx-copybutton ; extra == 'docs'
+  - sphinx-design ; extra == 'docs'
+  - sphinx>=6,<8.2 ; extra == 'docs'
+  - matplotlib ; extra == 'matplotlib'
+  - numpy>=1.23 ; extra == 'numpy'
+  - pint-pandas>=0.3 ; extra == 'pandas'
+  - scipy ; extra == 'scipy'
+  - pytest ; extra == 'test'
+  - pytest-benchmark ; extra == 'test'
+  - pytest-cov ; extra == 'test'
+  - pytest-subtests ; extra == 'test'
+  - pytest ; extra == 'test-all'
+  - pytest-benchmark ; extra == 'test-all'
+  - pytest-cov ; extra == 'test-all'
+  - pytest-mpl ; extra == 'test-all'
+  - pytest-subtests ; extra == 'test-all'
+  - pytest-mpl ; extra == 'test-mpl'
+  - uncertainties>=3.1.6 ; extra == 'uncertainties'
+  - xarray ; extra == 'xarray'
+  requires_python: '>=3.11'
 - pypi: https://files.pythonhosted.org/packages/97/19/5af93cae70c2e42f3ac568906f8f3909174450bdbf4d70ec420e1daef816/Pint_Pandas-0.7.1-py3-none-any.whl
   name: pint-pandas
   version: 0.7.1
@@ -2332,10 +2404,51 @@ packages:
   - nbval ; extra == 'test'
   - pyarrow ; extra == 'test'
   requires_python: '>=3.9'
+- pypi: https://files.pythonhosted.org/packages/0a/ac/c71db56079a5966ea365d29be0dafee6fd5ab9b8c7914b6507bc1a179134/pint_pandas-0.8.0-py3-none-any.whl
+  name: pint-pandas
+  version: 0.8.0
+  sha256: 40ee8a85f0923695fa7dcc6927caa3043627e1561c056e9f4499fb2e7478f779
+  requires_dist:
+  - pint>=0.24
+  - pandas>=3.0
+  - packaging>=26.0
+  - pytest ; extra == 'test'
+  - pytest-mpl ; extra == 'test'
+  - pytest-cov ; extra == 'test'
+  - pytest-subtests ; extra == 'test'
+  - codecov ; extra == 'test'
+  - coveralls ; extra == 'test'
+  - nbval ; extra == 'test'
+  - pyarrow ; extra == 'test'
+  - sphinx>=6,<8.2 ; extra == 'docs'
+  - ipython<=8.12 ; extra == 'docs'
+  - nbsphinx ; extra == 'docs'
+  - jupyter-client ; extra == 'docs'
+  - ipykernel ; extra == 'docs'
+  - graphviz ; extra == 'docs'
+  - pooch ; extra == 'docs'
+  - sparse ; extra == 'docs'
+  - serialize ; extra == 'docs'
+  - pygments>=2.4 ; extra == 'docs'
+  - sphinx-book-theme>=1.1.0 ; extra == 'docs'
+  - sphinx-copybutton ; extra == 'docs'
+  - sphinx-design ; extra == 'docs'
+  - matplotlib ; extra == 'docs'
+  - uncertainties-pandas ; extra == 'docs'
+  requires_python: '>=3.11'
 - pypi: https://files.pythonhosted.org/packages/23/12/0e888c6c114589d8d32d30525d77dbf9cd5c2811a37bfa61748bf412ed6d/pint_xarray-0.6.0-py3-none-any.whl
   name: pint-xarray
   version: 0.6.0
   sha256: a0bab1f1342b213a9a28d8d7b3fbf8afa23e29f94c7a8c77bda3779e9e00d51f
+  requires_dist:
+  - xarray>=2023.7.0
+  - numpy>=1.26
+  - pint>=0.24
+  requires_python: '>=3.11'
+- pypi: https://files.pythonhosted.org/packages/f4/0d/e20fbbf036a88fc7be7438f6fc1c7606e8806064f933f7eb6d4f110bc622/pint_xarray-0.6.1-py3-none-any.whl
+  name: pint-xarray
+  version: 0.6.1
+  sha256: 4f96682bda1234c3be652db2f9b7cfb8d858cc870c8e7a51213163e743d8ccf7
   requires_dist:
   - xarray>=2023.7.0
   - numpy>=1.26
@@ -2393,6 +2506,25 @@ packages:
   - pint-pandas
   - scipy
   - symbolite>=1.0.0
+  - tabulate
+  - typing-extensions
+  - scipy-events>=0.3.1
+  - statsmodels
+  - ipywidgets ; extra == 'interactive'
+  requires_python: '>=3.12'
+- pypi: ../u2602/poincare
+  name: poincare
+  version: 1.1.0
+  sha256: 5307d7c42d4a8139be5cce42e2cbff5c4d24edd747b8c5a587d911753951e622
+  requires_dist:
+  - numpy
+  - pandas
+  - xarray
+  - pint-xarray
+  - pint
+  - pint-pandas
+  - scipy
+  - symbolite>=1.1.0
   - tabulate
   - typing-extensions
   - scipy-events>=0.3.1
@@ -2823,6 +2955,15 @@ packages:
   - pkg:pypi/seaborn?source=hash-mapping
   size: 227843
   timestamp: 1733730112409
+- pypi: ../u2602/simbio
+  name: simbio
+  version: 1.0.1
+  sha256: 00ccc99fd7f12b4ba06bacc7113638e4fa7108e6ded416e5c4aea77f1de06fbb
+  requires_dist:
+  - poincare>=1.0.0
+  - biomodels ; extra == 'io'
+  - python-libsbml ; extra == 'io'
+  requires_python: '>=3.12'
 - pypi: https://files.pythonhosted.org/packages/1d/f3/5aebcaca5adc608157908e2f7eb72eaf180e60c26f276cab7d19fc1ef21f/simbio-1.0.1-py3-none-any.whl
   name: simbio
   version: 1.0.1
@@ -2907,10 +3048,19 @@ packages:
   - pkg:pypi/statsmodels?source=hash-mapping
   size: 11910748
   timestamp: 1764983438221
-- pypi: https://files.pythonhosted.org/packages/c8/1a/fbd7473c21cfbbc56e16e8b90212cd656d6d1c880f4396f1ef96f921c7c8/symbolite-1.0.0-py3-none-any.whl
+- pypi: ../u2602/symbolite
   name: symbolite
-  version: 1.0.0
-  sha256: c5dc4e1f3afa71d6947b01972b3f34d1504d5e04d3db3eb0214799762d52ff51
+  version: 1.1.0
+  sha256: 79ffb932070f6a7277a1534904face9bc8caf98dbccbbaa9650e19cc738a8c77
+  requires_dist:
+  - typing-extensions>=4.15
+  requires_python: '>=3.12'
+- pypi: https://files.pythonhosted.org/packages/51/9d/d580ae9bf9ce130102228215dc85aad5ba055ad78218057246b583f44fc5/symbolite-1.1.0-py3-none-any.whl
+  name: symbolite
+  version: 1.1.0
+  sha256: 1271de5218e28615013fbe934e152f66bc2cdf735b7e1bbaacf04687890ba266
+  requires_dist:
+  - typing-extensions>=4.15
   requires_python: '>=3.12'
 - pypi: https://files.pythonhosted.org/packages/40/44/4a5f08c96eb108af5cb50b41f76142f0afa346dfa99d5296fe7202a11854/tabulate-0.9.0-py3-none-any.whl
   name: tabulate
@@ -2919,6 +3069,13 @@ packages:
   requires_dist:
   - wcwidth ; extra == 'widechars'
   requires_python: '>=3.7'
+- pypi: https://files.pythonhosted.org/packages/99/55/db07de81b5c630da5cbf5c7df646580ca26dfaefa593667fc6f2fe016d2e/tabulate-0.10.0-py3-none-any.whl
+  name: tabulate
+  version: 0.10.0
+  sha256: f0b0622e567335c8fabaaa659f1b33bcb6ddfe2e496071b743aa113f8774f2d3
+  requires_dist:
+  - wcwidth ; extra == 'widechars'
+  requires_python: '>=3.10'
 - conda: https://conda.anaconda.org/conda-forge/win-64/tbb-2022.3.0-h3155e25_2.conda
   sha256: abd9a489f059fba85c8ffa1abdaa4d515d6de6a3325238b8e81203b913cf65a9
   md5: 0f9817ffbe25f9e69ceba5ea70c52606

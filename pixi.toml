@@ -29,7 +29,7 @@ seaborn = "*"
 rebop = "*"
 
 [feature.pypi.pypi-dependencies]
-symbolite = ">=1.0.0"
+symbolite = ">=1.1.0"
 poincare = ">=1.0.0b3"
 simbio = ">= 1.0.1"
 
