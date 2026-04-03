@@ -30,7 +30,7 @@ rebop = "*"
 
 [feature.pypi.pypi-dependencies]
 symbolite = ">=1.1.0"
-poincare = ">=1.0.0b3"
+poincare = ">=1.1.0"
 simbio = ">= 1.0.1"
 
 [feature.local.pypi-dependencies]
