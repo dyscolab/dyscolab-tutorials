@@ -275,7 +275,9 @@ def _(Ru_Os, np, plt, u):
         excitation_transition=Ru_Os.ru.abs,
         heights=np.logspace(21, 24, 20) / (u.cm**2 * u.s),
     )  # Sweep steady state emission spectra
-    steady.pint.dequantify().to_dataframe().T.plot()
+    df = steady.pint.dequantify().to_dataframe().T
+    df.index = df.index.map(lambda x: x.magnitude)
+    df.plot()
     plt.xscale("log")
     plt.yscale("log")
     plt.show()
