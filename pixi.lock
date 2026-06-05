@@ -164,10 +164,11 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstd-1.5.7-h534d264_6.conda
       - pypi: https://files.pythonhosted.org/packages/27/cd/c883e1a7c447479d6e13985565080e3fea88ab5a107c21684c813dba1875/flexcache-0.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/fe/5e/3be305568fe5f34448807976dc82fc151d76c3e0e03958f34770286278c1/flexparser-0.4-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/02/4a/577bb3926c808afeb096120f9e927c987ded83980c66f6701572320fa72f/jablonski-0.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/ab/88/550d41e81e6d43335603a960cd9c75c1d88f9cf01bc9d4ee8e86290aba7d/pint-0.25.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/97/19/5af93cae70c2e42f3ac568906f8f3909174450bdbf4d70ec420e1daef816/Pint_Pandas-0.7.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/23/12/0e888c6c114589d8d32d30525d77dbf9cd5c2811a37bfa61748bf412ed6d/pint_xarray-0.6.0-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/93/13/5b8e889677dc457cefa22b1b4c644ffcf3a83f06ba5dfd721dcbe5b80175/poincare-1.1.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/74/c2/efa8980ec1297b9e73166f961fb7eb36b638fce7f9185c67b7e1a62d356c/poincare-1.1.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/c7/fb/b9c6d0fc586104288adb41da22b7dbd9756a8508ee62b0854516cc87f5a4/rebop-0.9.7-cp314-cp314-win_amd64.whl
       - pypi: https://files.pythonhosted.org/packages/6f/f5/0538ca92fd0bf53e2c6cb997bd19285e0ffc12afc9193abd831423279435/scipy_events-0.4.4-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/1d/f3/5aebcaca5adc608157908e2f7eb72eaf180e60c26f276cab7d19fc1ef21f/simbio-1.0.1-py3-none-any.whl
@@ -1024,6 +1025,13 @@ packages:
   - pkg:pypi/itsdangerous?source=hash-mapping
   size: 19180
   timestamp: 1733308353037
+- pypi: https://files.pythonhosted.org/packages/02/4a/577bb3926c808afeb096120f9e927c987ded83980c66f6701572320fa72f/jablonski-0.2.0-py3-none-any.whl
+  name: jablonski
+  version: 0.2.0
+  sha256: 7ba4cd5ebb8e96eb568a92c18d87c921ea963d77503f2619c22745bb1b5de3ac
+  requires_dist:
+  - poincare>=1.1.1
+  requires_python: '>=3.12'
 - conda: https://conda.anaconda.org/conda-forge/noarch/jedi-0.19.2-pyhd8ed1ab_1.conda
   sha256: 92c4d217e2dc68983f724aa983cca5464dcb929c566627b26a2511159667dba8
   md5: a4f4c5dc9b80bc50e0d3dc4e6e8f1bd9
@@ -2380,10 +2388,10 @@ packages:
   - pkg:pypi/platformdirs?source=compressed-mapping
   size: 25646
   timestamp: 1773199142345
-- pypi: https://files.pythonhosted.org/packages/93/13/5b8e889677dc457cefa22b1b4c644ffcf3a83f06ba5dfd721dcbe5b80175/poincare-1.1.0-py3-none-any.whl
+- pypi: https://files.pythonhosted.org/packages/74/c2/efa8980ec1297b9e73166f961fb7eb36b638fce7f9185c67b7e1a62d356c/poincare-1.1.1-py3-none-any.whl
   name: poincare
-  version: 1.1.0
-  sha256: 42cf356060c2401caf37ddfbecc5e2854de4b00f35a647f7745ff6c0d9e28e57
+  version: 1.1.1
+  sha256: 348578e11fcebf3d2ca83bfcb03556501ed25130efb8b8c2df0ff9b0006fbc9b
   requires_dist:
   - numpy
   - pandas

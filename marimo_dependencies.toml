@@ -44,3 +44,12 @@ dependencies = [
     "seaborn",
 ]
 files = ["simbio/stochastic.py"]
+
+[base-jablonski]
+dependencies = [
+    "pint_pandas<=0.7",
+    "typing_extensions>=4.15.0",
+    "jablonski>=0.2.0",
+    "matplotlib",
+]
+files = ["jablonski/getting_started_with_jablonski.py"]
