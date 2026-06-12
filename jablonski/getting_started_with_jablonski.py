@@ -284,5 +284,87 @@ def _(Ru_Os, np, plt, u):
     return
 
 
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""
+    ## Other utilities
+    Jablonsi contains a number of other built-in classes to represent common photochemical transitions, found in `jablonski.transitions`, simulaton tools, found in `jablonski.simulation`, and graphical output tools, found in `jablonski.plots`, all of which are listed below. Since Jablonski is an extension of poincare most poincare utilities are also valid with jablonski and systems can interoperate (i.e. a system can be defined partly by transitions and partly by explicit ODEs). For more information see [poincare's documentation](https://dyscolab.github.io/poincare/#documentation).
+
+    ### Transitions
+    - `Absorption(ground: SingletState, excited: SingletState, rate: Parameter, pump: Parameter)`: A molecule absorbs a photon and is promoted from its ground (or any lower) singlet state to an excited singlet state, $S_0 \rightarrow S_1$. The effective rate is `rate * pump`.
+
+    - `TripletTripletAbsorption(ground: TripletState, excited: TripletState, rate: Parameter, pump: Parameter)`: A molecule in a lower triplet state absorbs a photon and is promoted to a higher triplet state, $T_1 \rightarrow T_n$. The effective rate is `rate * pump`.
+
+    - `VibrationalRelaxation(high: SpinState, low: SpinState, rate: Parameter)`: A non-radiative transition to a lower vibrational level within the same electronic state, $S_n(v') \rightarrow S_n(v)$.
+
+    - `InternalConversion(high: SpinState, low: SpinState, rate: Parameter)`: A non-radiative transition between two electronic states of the same spin multiplicity, $S_2 \rightarrow S_1$.
+
+    - `Fluorescence(excited: SpinState, ground: SpinState, rate: Parameter)`: A radiative transition between two electronic states of the same spin multiplicity, emitting a photon, $S_1 \rightarrow S_0 + h\nu$.
+
+    - `IntersystemCrossing(source: SingletState, target: TripletState, rate: Parameter)`: A non-radiative transition between isoenergetic vibrational levels of electronic states with different spin multiplicity, crossing from singlet to triplet, $S_1 \rightarrow T_1$.
+
+    - `ReverseIntersystemCrossing(source: TripletState, target: SingletState, rate: Parameter)`: A non-radiative transition between isoenergetic vibrational levels of electronic states with different spin multiplicity, crossing from triplet back to singlet, $T_1 \rightarrow S_1$.
+
+    - `Phosphorescence(excited: SpinState, ground: SpinState, rate: Parameter)`: A radiative transition between two electronic states of different spin multiplicity, emitting a photon, $T_1 \rightarrow S_0 + h\nu$.
+
+    - `EnergyTransferUpconversion(sensitizer: SingletState, activator: SingletState, relaxator: SingletState, rate: Parameter)`: Two sensitizer molecules in an excited state transfer their combined energy to promote an activator to a higher state while a relaxator relaxes to a lower one, $2 \cdot \text{Sensitizer} \rightarrow \text{Activator} + \text{Relaxator}$.
+
+    All transitions use `MassAction` kinetics. For example, `Fluorescence(excited=S1, ground=S0, rate=k)` gives:
+
+    $$
+    \begin{aligned}
+    \frac{d[\text{S}_1]}{dt} &= -k[\text{S}_1] \\
+    \frac{d[\text{S}_0]}{dt} &= +k[\text{S}_1]
+    \end{aligned}
+    $$
+
+    Jablonski contains a list of excpected ranges for all rates. To check them use `transitions.check_all(system: SpectroscopicSystem)`, which will raise warnings if any transitions have rates out of the expected range.
+
+    ### Simulation tools
+    **Time-resolved simulation** functions integrate the system dynamics over time:
+
+    - `piecewise(sim: Simulator, events: dict[Time, Mapping], save_at: NDArray)`: Low-level solver that integrates a `Simulator` across a sequence of time segments, applying parameter changes at each event boundary. Returns an xarray `Dataset`.
+
+    - `time_resolved_emission(system: SpectroscopicSystem, excitation: dict, save_at: NDArray, kind: SpectraKind = "emission")`: Simulates total emission intensity over time for all radiative transitions in `system`, summed across all emission lines. Returns an xarray `Dataset` with a single `emission` variable.
+
+    - `spectral_time_resolved_emission(system: SpectroscopicSystem, excitation: dict, save_at: NDArray, kind: SpectraKind = "emission", join_by_energy: bool = False)`: Like `time_resolved_emission`, but returns each emission line separately. If `join_by_energy=True`, lines sharing the same energy difference are summed together. Returns an xarray `Dataset`.
+
+
+    **Excitation creators** build event dictionaries to be passed to simulation functions:
+
+    - `step_excitation(excitation_transition: Pumper, height: float, start: Time = 0 * u.s)`: Creates a step excitation that turns on at `start` and remains on, setting `excitation_transition.pump` to `height`.
+
+    - `pulse_excitation(excitation_transition: Pumper, height: float, width: Time, start: Time = 0 * u.s)`: Creates a finite pulse excitation of duration `width` starting at `start`, setting `excitation_transition.pump` to `height` and then back to zero.
+
+    - `delta_excitation(excitation_transition: Pumper, area: Time, start: Time = 0 * u.s)`: Creates an approximation of a $\delta$-function excitation with a given integrated `area`, implemented as a very short pulse of proportionally large height.
+
+    **Steady-state simulation** functions compute the long-time equilibrium of the system under continuous excitation:
+
+    - `steady_state_emission(system: SpectroscopicSystem, excitation_transition: Pumper, height: float, kind: SpectraKind = "emission")`: Computes total steady-state emission intensity, summed over all radiative transitions. Returns an xarray `Dataset` with a single `emission` variable.
+
+    - `spectral_steady_state_emission(system: SpectroscopicSystem, excitation_transition: Pumper | Iterable[Pumper], height: float | Iterable[float], kind: SpectraKind = "emission", join_by_energy: bool = False)`: Like `steady_state_emission`, but returns each emission line separately, optionally accepting multiple simultaneous excitation sources. If `join_by_energy=True`, lines sharing the same energy difference are summed together. Returns an xarray `Dataset` with a dictionary mapping the line's key to the actual pint quantity representing the enrgy in `Dataset.attrs`.
+
+    **Spectra** functions compute emission and excitation spectra as a function of wavelength:
+
+    - `emission_spectra(system: SpectroscopicSystem, excitation_transition: Pumper | Iterable[Pumper], height: float | Iterable[float], unit: str | Unit = u.nm, kind: SpectraKind = "emission")`: Computes a CW emission spectrum, converting energy differences to wavelengths in the given `unit`. Returns an xarray `DataArray` indexed by wavelength.
+
+    - `widened_emission_spectra(system: SpectroscopicSystem, excitation_transition: Pumper | Iterable[Pumper], height: float | Iterable[float], unit: str | Unit = u.nm, kind: SpectraKind = "emission", samples: Iterable[float] = np.linspace(380, 700, 1000), width: float = 5)`: Like `emission_spectra`, but broadens each discrete emission line into a Gaussian of standard deviation `width` and evaluates the result over `samples`, mostly useful to generate plots manually (altough `plots.graph_spectra` can be uesd for that). Returns an xarray `DataArray` indexed by wavelength.
+
+    - `excitation_emission_matrix(system: SpectroscopicSystem, height: float | Iterable[float], unit: str | Unit = u.nm)`: Computes a emission spectra for every `Pumper` in `system`, returning the full excitation-emission matrix as an xarray `Dataset` keyed by pumper excited.
+
+    - `excitation_spectra(system: SpectroscopicSystem, emission: float | int | Quantity, height: float | Iterable[float], unit: str | Unit = u.nm)`: Extracts a slice of the excitation-emission matrix at a fixed emission wavelength, returning intensity as a function of excitation source. Returns an xarray `DataArray` indexed by pumper.
+
+    ### Graphical output
+
+    - `graph_spectra(system: SpectroscopicSystem, excitation_transition: Pumper | Iterable[Pumper], height: float, unit: str | Unit = u.nm, kind: SpectraKind = "emission", samples: Iterable[float] = np.linspace(380, 700, 1000), width: float = 5)`: Plots a widened emission spectrum as a wavelength-colored line, with wavelength on the x-axis and emission intensity in photons on the y-axis. Returns a `(fig, ax)` tuple.
+
+
+    - `jablonski_diagram(system: SpectroscopicSystem, figsize: tuple[Number, Number] = (6.4, 4.8), fontsize: Number = 10, show_energy_axis: bool = True, unit: str | Unit = u.eV)`: Renders a Jablonski diagram for `system`, organizing states into singlet and triplet columns with energy on the y-axis in the given `unit`. Radiative and non-radiative transitions are drawn distinctly by a straight and wiggly line respectively. Returns a `(fig, ax)` tuple.
+
+    - `model_report(model: type[SpectroscopicSystem], path: str | None = None, transform: dict | None = None, descriptions: dict | None = None, standalone: bool = True, replace_algebraics: bool = False)`: Generates a Latex report for `model`, including a Jablonski diagram section rendered as a PGF figure alongside the default model sections. If `path` is provided the report is written to disk; otherwise a `Latex` object is returned. `replace_algebraics` controls wheteher Parametrs with algebraic dependence (i.e. that depend on ohter parametrs or variables) are included as defined or replpaced by there dependence.
+    """)
+    return
+
+
 if __name__ == "__main__":
     app.run()
