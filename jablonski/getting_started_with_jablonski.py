@@ -27,7 +27,7 @@ async with app.setup(hide_code=True):
 def _():
     mo.md(r"""
     # Getting Started with Jablonski
-    Jablonski is a python library for simulating photochemical systems. It extends [poincare](https://dyscolab.github.io/poincare/), a package for modelling dynamical systems. To get started let's implement the ruthenium tris(bipyridine) model described in https://doi.org/10.1016/j.ccr.2020.213758.
+    Jablonski is a python library for simulating photochemical systems. It extends [poincare](https://dyscolab.github.io/poincare/), a package for modelling dynamical systems. To get started let's implement a simplified version of the ruthenium tris(bipyridine) model described in https://doi.org/10.1016/j.ccr.2020.213758.
     """)
     return
 
@@ -110,7 +110,17 @@ def _():
 def _():
     mo.md(r"""
     Let's break this down. First we import all necessary functions from Jablonski as well as [pint](https://pint.readthedocs.io/en/stable/), which will allow us to use units from a `UnitResgitry`.
-    Then we create a class which inherits from `SpectroscopicSystem` and we define three levels: `ground`, `MLCT_1`, and `MLCT_3`. Each has an `energy`, which will by default be interpret as eV, a `multiplicity` which is either "singlet" or "triplet", and a default initial condition. We then create a four transitions: `Absorption` represents photon absorption, which we give a ground state, an excited state and a rate, which represents the photon absorption cross section and must thus be in units of distance squared. There are three emissions: two non-radiative, `ReverseIntersystemCrossing` and `IntersystemCrossing`, and one radiative, `Phosphorescence`. This time the rate is the inverse of $\text{lifetime} \cdot \text{quantum yield}$, so it must be in units of inverse time. We can create a make a Jablonski diagram to visualize this easier.
+    Then we create a class which inherits from `SpectroscopicSystem` and we define three levels: `ground`, `MLCT_1`, and `MLCT_3`. Each has an `energy`, which will by default be interpret as eV, a `multiplicity` which is either "singlet" or "triplet", and a default initial condition representing level population (which could optionally also have units). We then create a four transitions: `Absorption` represents photon absorption, which we give a ground state, an excited state and a rate, which represents the photon absorption cross section and must thus be in units of distance squared. There are three emissions: two non-radiative, `ReverseIntersystemCrossing` and `IntersystemCrossing`, and one radiative, `Phosphorescence`. This time the rate is the inverse of $\text{lifetime} \cdot \text{quantum yield}$, so it must be in units of inverse time. Transitions are later translated to ODEs (although stochastic simulation will be supported in the future). As an example the `Absorption` above translates to:
+
+    $$
+    \begin{aligned}
+    \frac{d\,\text{ground}}{dt} &= -\text{rate} \cdot \text{pump} \cdot \text{ground} \\
+    \frac{d\,\text{MLCT}_1}{dt} &= +\text{rate} \cdot \text{pump} \cdot \text{ground}
+    \end{aligned}
+    $$
+
+
+    We can create a make a Jablonski diagram to visualize this easier.
     """)
     return
 
@@ -160,7 +170,7 @@ def _(result_1):
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    Jablonski Systems are composable, so to create the Compound with Osmium defined in the paper we can create the Osmium compound separately and then combine them.
+    Jablonski Systems are composable, so to create the compound with Osmium defined in the paper we can create the Osmium compound separately and then combine them.
     """)
     return
 
@@ -313,8 +323,8 @@ def _():
 
     $$
     \begin{aligned}
-    \frac{d[\text{S}_1]}{dt} &= -k[\text{S}_1] \\
-    \frac{d[\text{S}_0]}{dt} &= +k[\text{S}_1]
+    \frac{dS_1}{dt} &= -kS_1 \\
+    \frac{dS_0}{dt} &= +kS_1
     \end{aligned}
     $$
 
