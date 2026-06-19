@@ -13,7 +13,12 @@ async with app.setup(hide_code=True):
         import micropip
 
         await micropip.install(
-            ["pint_pandas<=0.7", "typing_extensions>=4.15.0", "simbio>=1.1.0", "matplotlib"],
+            [
+                "pint_pandas<=0.7",
+                "typing_extensions>=4.15.0",
+                "simbio>=1.1.0",
+                "matplotlib",
+            ],
             verbose=False,
         )
 
@@ -257,7 +262,7 @@ def _(Repressilator, np, sim_2):
 def _():
     mo.md(r"""
     ## Analysis
-    Poincare includes capabilities for a number of anlysis methods, including the search for stead states, bistability, or limit cycles.
+    Poincare includes capabilities for a number of analysis methods, including the search for stead states, bistability, or limit cycles.
     In this case we can use the `Oscillations` class to do a parameter sweep and see how the period changes.
     """)
     return

@@ -371,7 +371,7 @@ def _():
 
     - `jablonski_diagram(system: SpectroscopicSystem, figsize: tuple[Number, Number] = (6.4, 4.8), fontsize: Number = 10, show_energy_axis: bool = True, unit: str | Unit = u.eV)`: Renders a Jablonski diagram for `system`, organizing states into singlet and triplet columns with energy on the y-axis in the given `unit`. Radiative and non-radiative transitions are drawn distinctly by a straight and wiggly line respectively. Returns a `(fig, ax)` tuple.
 
-    - `model_report(model: type[SpectroscopicSystem], path: str | None = None, transform: dict | None = None, descriptions: dict | None = None, standalone: bool = True, replace_algebraics: bool = False)`: Generates a Latex report for `model`, including a Jablonski diagram section rendered as a PGF figure alongside the default model sections. If `path` is provided the report is written to disk; otherwise a `Latex` object is returned. `replace_algebraics` controls wheteher Parametrs with algebraic dependence (i.e. that depend on ohter parametrs or variables) are included as defined or replpaced by there dependence.
+    - `model_report(model: type[SpectroscopicSystem], path: str | None = None, transform: dict | None = None, descriptions: dict | None = None, standalone: bool = True, replace_algebraics: bool = False)`: Generates a Latex report for `model`, including a Jablonski diagram section rendered as a PGF figure alongside the default model sections. If `path` is provided the report is written to disk; otherwise the source is returned as a string. `replace_algebraics` controls wheteher Parameters with algebraic dependence (i.e. that depend on ohter parameters or variables) are included as defined or replpaced by their dependence.
     """)
     return
 
