@@ -13,7 +13,12 @@ async with app.setup(hide_code=True):
         import micropip
 
         await micropip.install(
-            ["pint_pandas<=0.7", "typing_extensions>=4.15.0", "poincare>=1.1.0", "matplotlib"],
+            [
+                "pint_pandas<=0.7",
+                "typing_extensions>=4.15.0",
+                "poincare>=1.1.0",
+                "matplotlib",
+            ],
             verbose=False,
         )
 
@@ -293,13 +298,6 @@ def _(mo):
     For more information on poincare and other dyscolab libraries, including [SimBio](https://dyscolab.github.io/simbio/) for chemical reaction neworks and [Jablonski](https://dyscolab.github.io/jablonski/) for photochemical systems, see the full [documentation](https://dyscolab.github.io/poincare/) on [dyscolab's homepage](https://dyscolab.github.io/).
     """)
     return
-
-
-@app.cell
-def _():
-    import marimo as mo
-
-    return (mo,)
 
 
 if __name__ == "__main__":
