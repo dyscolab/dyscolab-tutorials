@@ -8,7 +8,7 @@ app = marimo.App(width="medium")
 def _(mo):
     mo.md(r"""
     # Excitable Cell-Cell interactions
-    Poincare offers a flexible suite of tools to simulate and analyze dynamical systems. As an example, we can implement the sensitivity analysis on Cell-Cell excitable intercations from [Excitability as a design principle in the immune system](10.1126/sciadv.aeb0921).
+    [Poincare](https://dyscolab.github.io/poincare/) offers a flexible suite of tools to simulate and analyze dynamical systems. As an example, we can implement the sensitivity analysis on Cell-Cell excitable intercations from [Excitability as a design principle in the immune system](10.1126/sciadv.aeb0921).
     To begin we define the system, including variables, parameters and equations.
     """)
     return
@@ -231,7 +231,14 @@ def _(LinkedCellInteraction, amp_sensitiviy, amp_sweeper, lsim, np, plt):
     plt.legend()
     print(f"All simulations decayed at least 10% from maximum: {all_verified}")
     plt.show()
-    print([x for x in zip(np.linspace(0.1, 2.5, 50),results[LinkedCellInteraction.f])])
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    For more information on poincare and other dyscolab libraries, including [SimBio](https://dyscolab.github.io/simbio/) for chemical reaction neworks and [Jablonski](https://dyscolab.github.io/jablonski/) for photochemical systems, see the full [documentation](https://dyscolab.github.io/poincare/) on [dyscolab's homepage](https://dyscolab.github.io/).
+    """)
     return
 
 
