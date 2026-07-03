@@ -20,6 +20,7 @@ files = [
     "poincare/getting_started_with_poincare.py",
     "poincare/getting_started_with_poincare.py",
     "poincare/simulation.py",
+    "examples/excitabilty.py",
 ]
 
 [base-simbio]
