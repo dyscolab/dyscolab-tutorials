@@ -301,7 +301,7 @@ def _(LinkedCellInteraction, amp_sensitivity, amp_sweeper, lsim, np, plt):
         results[var] = np.gradient(
             np.log(sweep_result["max"].values), np.log(sweep_result[str(var)].values)
         )
-        all_verified = all_verified and np.all(sweep_result["verified"]).values
+        all_verified = all_verified and np.all(sweep_result["verified"].values)
 
     for var, res in results.items():
         plt.plot(np.linspace(0, 1, 50), res, "--.", label=str(var))
