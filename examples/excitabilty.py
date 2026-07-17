@@ -97,6 +97,23 @@ def _(result):
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
+    Poincare's `latex_equations()` automatically generates Latex code for the model's equations so we can check they are defined correctly.
+    """)
+    return
+
+
+@app.cell
+def _(CellInteraction):
+    from poincare.printing.latex import latex_equations
+
+    equations = latex_equations(CellInteraction)
+    mo.md(equations)
+    return
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""
     To get the refractory period we can use poincare's `Sweeper`  tool, which can do parameter sweeps and apply a custom function to analyze each run. We must first define the function.
     """)
     return
