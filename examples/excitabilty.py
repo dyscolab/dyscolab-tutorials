@@ -24,10 +24,13 @@ async with app.setup(hide_code=True):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
     # Excitable Cell-Cell interactions
-    [Poincare](https://dyscolab.github.io/poincare/) offers a flexible suite of tools to simulate and analyze dynamical systems. As an example, we can implement the sensitivity analysis on Cell-Cell excitable intercations from [Excitability as a design principle in the immune system](10.1126/sciadv.aeb0921).
+    [Poincare](https://dyscolab.github.io/poincare/) offers a flexible suite of tools to simulate and analyze dynamical systems. As an example, we can implement the sensitivity analysis of cell-cell excitable interactions from _Yael Lebel, Uri Alon, Excitability as a design principle in the immune system.
+    Sci. Adv.12, eaeb0921(2026).
+    DOI: [10.1126/sciadv.aeb0921](https://www.science.org/doi/10.1126/sciadv.aeb0921)_. The results are analogous to those shown in the paper's Figure 6.
+
     To begin we define the system, including variables, parameters and equations.
     """)
     return
@@ -40,13 +43,13 @@ def _():
     import matplotlib.pyplot as plt
     from poincare import System, Variable, Parameter, initial, assign, Simulator
 
-    class CellInteraction(System):  # Models are a class thath inherits from System
+    class CellInteraction(System):  # Models are a class that inherits from System
         X: Variable = initial(
             default=10
         )  # Variable X with default initial condition 10
         Y: Variable = initial(default=0.1)
 
-        a: Parameter = assign(default=1)  # Variable a with default value 1
+        a: Parameter = assign(default=1)  # Parameter a with default value 1
         b: Parameter = assign(default=1)
         c: Parameter = assign(default=100)
         d: Parameter = assign(default=2)
@@ -62,25 +65,39 @@ def _():
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
-    Which can be simulated with a `Simulator`
+    Which can be simulated with a `Simulator`.
     """)
     return
 
 
 @app.cell
 def _(CellInteraction, Simulator, np):
-    sim = Simulator(CellInteraction)  # Create Simulator for or
+    sim = Simulator(CellInteraction)  # Create Simulator for CellInteraction
     result = sim.solve(save_at=np.linspace(0, 5, 100))  # Solve ODE
-    result.to_dataframe().plot()  # Solve outputs an xarray Datset, convert to Dataframe to plot
-    return (sim,)
+    result  # Display result (xarray Dataset)
+    return result, sim
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
-    To get the refractory period we can use poincare's `Sweeper`  tool, which can do parameter sweeps and apply a custom function to analyze each run. We must first define the function
+    `solve()` outputs an [xarray](https://docs.xarray.dev/en/stable/) `Dataset`, which we can plot by converting to a [pandas](https://pandas.pydata.org/) DataFrame and using the inbuilt method.
+    """)
+    return
+
+
+@app.cell
+def _(result):
+    result.to_dataframe().plot()
+    return
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""
+    To get the refractory period we can use poincare's `Sweeper`  tool, which can do parameter sweeps and apply a custom function to analyze each run. We must first define the function.
     """)
     return
 
@@ -89,11 +106,13 @@ def _(mo):
 def _():
     from poincare.analysis.sweeper import Sweeper
 
-    def get_refractory(ds):  # Function to get refractory period
-        max_time = ds["Y"].idxmax()
-        max_val = ds["Y"].sel(time=max_time).item()
+    def get_refractory(simulation_result):
+        """Calculates refractory period from simulation result by looking for
+        the first time with Y concetration less than 1% of maximum"""
+        max_time = simulation_result["Y"].idxmax()
+        max_val = simulation_result["Y"].sel(time=max_time).item()
 
-        data_after_max = ds["Y"].sel(time=slice(max_time, None))
+        data_after_max = simulation_result["Y"].sel(time=slice(max_time, None))
         times_below_threshold = data_after_max.time.where(
             data_after_max < 0.01 * max_val, drop=True
         )
@@ -103,9 +122,9 @@ def _():
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
-    We can then create a `Sweeper` for it
+    We can then create a `Sweeper` for it.
     """)
     return
 
@@ -117,8 +136,10 @@ def _(CellInteraction, Sweeper, get_refractory, np, plt, sim):
         sim=sim,
         save_at=np.linspace(0, 50, 1000),
         parameter=CellInteraction.g,
-        values=np.linspace(0.1, 2, 50),
-    )  # Do sweep, we give a save_at for each simulation run and values to sweep the parameter
+        values=np.linspace(
+            0.1, 2, 50
+        ),  # Parameter sweep range from the paper's supplementary materials
+    )  # Run the sweep, we pass a save_at for each simulation run and values to sweep the parameter
     refractory_period.to_dataframe().plot(ls="--", marker=".")
     plt.ylabel("Refractory period")
     plt.show()
@@ -126,29 +147,31 @@ def _(CellInteraction, Sweeper, get_refractory, np, plt, sim):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
-    And calculate and plot the sensitivity $\frac{d\log(R)}{d\log(g)}$
+    And calculate and plot the sensitivity $\frac{d\log(R)}{d\log(g)}$.
     """)
     return
 
 
 @app.cell
 def _(np, plt, refractory_period):
-    sensitiviy = np.gradient(
+    sensitivity = np.gradient(
         np.log(refractory_period["result"].values),
         np.log(refractory_period["g"].values),
     )
-    plt.plot(refractory_period["g"].values, sensitiviy, "--.")
+    plt.plot(refractory_period["g"].values, sensitivity, "--.")
     plt.xlabel("g")
-    plt.ylabel("sensitivity")
+    plt.ylabel("Sensitivity")
     return
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
-    We can run a similar analysis from the pulse amplitude. Since the initial conditions cahnge depending on the parameters to make them comparable we can wrap our System and use `Constant` to ensure they are propperly linked
+    Although the numerical derivative shows some instability the sensitivity oscillates around -1, the value given in Figure 6.E. of the paper.
+
+    We can run a similar analysis from the pulse amplitude. Since the initial conditions change depending on the parameters to make them comparable we can wrap our System and use `Constant` to ensure they are properly linked.
     """)
     return
 
@@ -161,7 +184,7 @@ def _(CellInteraction, Simulator, System, assign, np):
     class LinkedCellInteraction(System):
         a: Constant = assign(
             default=1, constant=True
-        )  # Constants to represnt initial conditions
+        )  # Constants to represent initial conditions
         b: Constant = assign(default=1, constant=True)
         c: Constant = assign(default=100, constant=True)
         d: Constant = assign(default=2, constant=True)
@@ -173,7 +196,7 @@ def _(CellInteraction, Simulator, System, assign, np):
             default=1.1 * c / 2 * (1 - real.sqrt(1 - (4 * d) / (c * a))), constant=True
         )
 
-        # Instancig a models adds all it's variables, equations and paremeters. We can pass values and initial conditions
+        # Instantiating a models adds all its variables, equations and parameters. We can pass values and initial conditions
         int = CellInteraction(a=a, b=b, c=c, d=d, f=f, g=g, X=threshold_110, Y=0.0025)
 
     lsim = Simulator(LinkedCellInteraction)
@@ -182,22 +205,24 @@ def _(CellInteraction, Simulator, System, assign, np):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
-    Then us another `Sweeper` to get the pulse amplitude on each run
+    Then use another `Sweeper` to get the pulse amplitude on each run.
     """)
     return
 
 
 @app.cell
 def _(LinkedCellInteraction, Sweeper, lsim, np):
-    def get_pulse_amplitude(ds):
-        max = ds["int.X"].max().item()
-        last = ds["int.X"].isel(time=-1).item()
-        verified = np.abs(last) < 0.9 * np.abs(
-            max
-        )  # Check X has decayed 10% from max to know ew seimlated long enough
-        return {"max": max, "verified": verified}  # When we return a dictionary Sweep
+    def get_pulse_amplitude(simulation_result):
+        """Calculates pulse amplitude from simulation result by looking for maximum X concentration
+        and checking it has decayed at least 10% from peak by the time the simulation ends"""
+        max = simulation_result["int.X"].max().item()
+        last = simulation_result["int.X"].isel(time=-1).item()
+
+        # Check X has decayed 10% from max to know we simulated long enough
+        verified = np.abs(last) < 0.9 * np.abs(max)
+        return {"max": max, "verified": verified}
 
     amp_sweeper = Sweeper(func=get_pulse_amplitude)
     pulse_amplitude = amp_sweeper.sweep(
@@ -211,9 +236,9 @@ def _(LinkedCellInteraction, Sweeper, lsim, np):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
-    When a function returns a dictionary `Sweeper` will automatically unpcak it, altough this can be disabled by passing `unpack = False` to `sweep`. We can now plot the result
+    When a function returns a dictionary `Sweeper` will automatically unpack it, although this can be disabled by passing `unpack = False` to `sweep`. We can now plot the result.
     """)
     return
 
@@ -221,7 +246,7 @@ def _(mo):
 @app.cell
 def _(np, plt, pulse_amplitude):
     pulse_amplitude["max"].to_dataframe().plot(ls="--", marker=".")
-    plt.ylabel("Pulse Amplitude")
+    plt.ylabel("Pulse amplitude")
     print(
         f"All simulations decayed at least 10% from maximum: {np.all(pulse_amplitude['verified']).values}"
     )
@@ -230,34 +255,34 @@ def _(np, plt, pulse_amplitude):
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
-    And calculate the sensitivity $\frac{d\log(A)}{d\log(a)}$
+    And calculate the sensitivity $\frac{d\log(A)}{d\log(a)}$.
     """)
     return
 
 
 @app.cell
 def _(np, plt, pulse_amplitude):
-    amp_sensitiviy = np.gradient(
+    amp_sensitivity = np.gradient(
         np.log(pulse_amplitude["max"].values), np.log(pulse_amplitude["a"].values)
     )
-    plt.plot(pulse_amplitude["a"].values, amp_sensitiviy, "--.")
+    plt.plot(pulse_amplitude["a"].values, amp_sensitivity, "--.")
     plt.xlabel("a")
-    plt.ylabel("sensitivity")
-    return (amp_sensitiviy,)
+    plt.ylabel("Sensitivity")
+    return (amp_sensitivity,)
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
-    This can be esaily generalized to the other parameters
+    This can be easily generalized to the other parameters.
     """)
     return
 
 
 @app.cell
-def _(LinkedCellInteraction, amp_sensitiviy, amp_sweeper, lsim, np, plt):
+def _(LinkedCellInteraction, amp_sensitivity, amp_sweeper, lsim, np, plt):
     ranges = {
         LinkedCellInteraction.b: np.linspace(0.1, 5, 50),
         LinkedCellInteraction.c: np.linspace(200, 500, 50),
@@ -267,7 +292,7 @@ def _(LinkedCellInteraction, amp_sensitiviy, amp_sweeper, lsim, np, plt):
         LinkedCellInteraction.f: np.linspace(0.1, 2.5, 50),
         LinkedCellInteraction.g: np.linspace(0.1, 10, 50),
     }
-    results = {LinkedCellInteraction.a: amp_sensitiviy}  # Include previous result
+    results = {LinkedCellInteraction.a: amp_sensitivity}  # Include previous result
     all_verified = True
     for var, values in ranges.items():
         sweep_result = amp_sweeper.sweep(
@@ -285,13 +310,48 @@ def _(LinkedCellInteraction, amp_sensitiviy, amp_sweeper, lsim, np, plt):
     plt.legend()
     print(f"All simulations decayed at least 10% from maximum: {all_verified}")
     plt.show()
+    return ranges, results
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""
+    We can now get the sensitivity around the parameter values given in Figure 6.E. from the full result to make a similar bar chart.
+    """)
+    return
+
+
+@app.cell
+def _(LinkedCellInteraction, np, plt, pulse_amplitude, ranges, results):
+    full_ranges = {
+        LinkedCellInteraction.a: pulse_amplitude["a"].values
+    } | ranges  # Parameter a wasn't included in ranges
+    central_parameters = {
+        LinkedCellInteraction.a: 1,
+        LinkedCellInteraction.b: 1,
+        LinkedCellInteraction.c: 100,
+        LinkedCellInteraction.d: 2,
+        LinkedCellInteraction.f: 1,
+        LinkedCellInteraction.g: 1,
+    }
+    central_values = np.array(
+        [
+            results[param][np.argmin(np.abs(full_ranges[param] - val))]
+            for param, val in central_parameters.items()
+        ]
+    )  # Get sensitvity at parameter value closest to central value
+    plt.bar(range(len(central_values)), central_values)
+    plt.xticks(
+        range(len(central_values)), [str(param) for param in central_parameters.keys()]
+    )
+    plt.show()
     return
 
 
 @app.cell(hide_code=True)
-def _(mo):
+def _():
     mo.md(r"""
-    For more information on poincare and other dyscolab libraries, including [SimBio](https://dyscolab.github.io/simbio/) for chemical reaction neworks and [Jablonski](https://dyscolab.github.io/jablonski/) for photochemical systems, see the full [documentation](https://dyscolab.github.io/poincare/) on [dyscolab's homepage](https://dyscolab.github.io/).
+    For more information on poincare and other dyscolab libraries, including [SimBio](https://dyscolab.github.io/simbio/) for chemical reaction networks and [Jablonski](https://dyscolab.github.io/jablonski/) for photochemical systems, see the full [documentation](https://dyscolab.github.io/poincare/) on [dyscolab's homepage](https://dyscolab.github.io/).
     """)
     return
 
