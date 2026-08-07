@@ -2,7 +2,7 @@
 authors = ["Oliverio Starosta <oliveriostarosta@gmail.com>"]
 channels = ["conda-forge"]
 name = "dyscolab-tutorials"
-platforms = ["win-64"]
+platforms = ["win-64", "linux-64"]
 version = "0.1.0"
 
 [tasks]
