@@ -21,7 +21,12 @@ async with app.setup(hide_code=True):
         import micropip
 
         await micropip.install(
-            ["pint_pandas<=0.7", "typing_extensions>=4.15.0", "poincare>=1.1.0", "matplotlib"],
+            [
+                "pint_pandas<=0.7",
+                "typing_extensions>=4.15.0",
+                "poincare>=1.1.0",
+                "matplotlib",
+            ],
             verbose=False,
         )
 
@@ -422,7 +427,7 @@ def _():
 
 @app.cell
 def _(ParametrizedDecay, model_report):
-    model_report(ParametrizedDecay,path="Parametrized_Decay_report.tex")
+    model_report(ParametrizedDecay, path="Parametrized_Decay_report.tex")
     return
 
 
@@ -461,7 +466,7 @@ def _(Derivative, Parameter, Simulator, System, Variable, assign, initial):
         w: Parameter = assign(default=1 * unit.Hz)
         eq = v.derive() << -(w**2) * x
 
-    result_3 = Simulator(UnitModel).solve(save_at=range(3))
+    result_3 = Simulator(UnitModel).solve(save_at=np.array(range(3)) * unit.s)
     return (result_3,)
 
 
