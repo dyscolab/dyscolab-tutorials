@@ -32,7 +32,7 @@ rebop = "*"
 symbolite = ">=1.1.0"
 poincare = ">=1.1.2"
 simbio = ">= 1.0.1"
-jablonski = ">= 0.2.0"
+jablonski = ">= 0.3.0"
 
 
 [feature.local.pypi-dependencies]
