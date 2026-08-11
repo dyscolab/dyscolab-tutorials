@@ -50,7 +50,7 @@ files = ["simbio/stochastic.py"]
 dependencies = [
     "pint_pandas<=0.7",
     "typing_extensions>=4.15.0",
-    "jablonski>=0.3.0",
+    "jablonski>=0.3.1",
     "matplotlib",
 ]
 files = ["jablonski/getting_started_with_jablonski.py"]

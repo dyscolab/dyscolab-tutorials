@@ -219,6 +219,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/wcwidth-0.8.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/widgetsnbextension-4.0.15-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/zipp-4.1.0-pyhcf101f3_0.conda
+      - pypi: https://files.pythonhosted.org/packages/03/59/b04e377c65597c718d6f186ba46d8d896ebded010116780a49fa486e1c21/jablonski-0.3.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/12/68/84bc1b3bcbad35ba88a7d4c3c53027c9170eab0d285ea5ee302ae3018ae9/simbio-1.1.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/1b/dd/a9fe6a0a09512da23951c68bf36466aeecd89def3183dc095edbc807ddc5/pint-0.25.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/27/cd/c883e1a7c447479d6e13985565080e3fea88ab5a107c21684c813dba1875/flexcache-0.3-py3-none-any.whl
@@ -228,7 +229,6 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/7b/d0/d339864b24ae5c8910b358bf6379ade7f13752fd3df6a5f8da5e8aae0327/rebop-0.9.7-cp314-cp314-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/7f/30/50482f0fd9e4880f8dd29c72032eb73822e17160062684d838b6721340c0/poincare-1.1.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/99/55/db07de81b5c630da5cbf5c7df646580ca26dfaefa593667fc6f2fe016d2e/tabulate-0.10.0-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/cd/e9/87d00b760a87916021e559940293a5d0764e6651992e622606f7db373fa5/jablonski-0.3.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/f4/0d/e20fbbf036a88fc7be7438f6fc1c7606e8806064f933f7eb6d4f110bc622/pint_xarray-0.6.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/fe/5e/3be305568fe5f34448807976dc82fc151d76c3e0e03958f34770286278c1/flexparser-0.4-py3-none-any.whl
       win-64:
@@ -385,6 +385,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/zeromq-4.3.5-h5bddc39_9.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zlib-ng-2.3.3-h0261ad2_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstd-1.5.7-h534d264_6.conda
+      - pypi: https://files.pythonhosted.org/packages/03/59/b04e377c65597c718d6f186ba46d8d896ebded010116780a49fa486e1c21/jablonski-0.3.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/1d/f3/5aebcaca5adc608157908e2f7eb72eaf180e60c26f276cab7d19fc1ef21f/simbio-1.0.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/23/12/0e888c6c114589d8d32d30525d77dbf9cd5c2811a37bfa61748bf412ed6d/pint_xarray-0.6.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/27/cd/c883e1a7c447479d6e13985565080e3fea88ab5a107c21684c813dba1875/flexcache-0.3-py3-none-any.whl
@@ -395,7 +396,6 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/99/92/545eb2ca17fc0e05456728d7e4378bfee48d66433ae3b7e71948e46826fb/xarray-2026.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/ab/88/550d41e81e6d43335603a960cd9c75c1d88f9cf01bc9d4ee8e86290aba7d/pint-0.25.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/c7/fb/b9c6d0fc586104288adb41da22b7dbd9756a8508ee62b0854516cc87f5a4/rebop-0.9.7-cp314-cp314-win_amd64.whl
-      - pypi: https://files.pythonhosted.org/packages/cd/e9/87d00b760a87916021e559940293a5d0764e6651992e622606f7db373fa5/jablonski-0.3.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/fe/5e/3be305568fe5f34448807976dc82fc151d76c3e0e03958f34770286278c1/flexparser-0.4-py3-none-any.whl
   local:
     channels:
@@ -6374,6 +6374,13 @@ packages:
   purls: []
   size: 388453
   timestamp: 1764777142545
+- pypi: https://files.pythonhosted.org/packages/03/59/b04e377c65597c718d6f186ba46d8d896ebded010116780a49fa486e1c21/jablonski-0.3.1-py3-none-any.whl
+  name: jablonski
+  version: 0.3.1
+  sha256: cd629acc4c2ed2909ca146510036502d3d4403d431866fa0c7ebcf32e4b0ae43
+  requires_dist:
+  - poincare>=1.1.2
+  requires_python: '>=3.12'
 - pypi: https://files.pythonhosted.org/packages/12/68/84bc1b3bcbad35ba88a7d4c3c53027c9170eab0d285ea5ee302ae3018ae9/simbio-1.1.0-py3-none-any.whl
   name: simbio
   version: 1.1.0
@@ -6705,13 +6712,6 @@ packages:
   - mkdocs>=1.6.1,<2 ; extra == 'doc'
   - mkdocs-material>=9.5.49,<10 ; extra == 'doc'
   - mkdocstrings[python]>=0.27.0,<0.28 ; extra == 'doc'
-  requires_python: '>=3.12'
-- pypi: https://files.pythonhosted.org/packages/cd/e9/87d00b760a87916021e559940293a5d0764e6651992e622606f7db373fa5/jablonski-0.3.0-py3-none-any.whl
-  name: jablonski
-  version: 0.3.0
-  sha256: a0e58911bbc6b829e9d3eb4842b8de0107d5a97af8493eb196a4b907b6f8624a
-  requires_dist:
-  - poincare>=1.1.2
   requires_python: '>=3.12'
 - pypi: https://files.pythonhosted.org/packages/f4/0d/e20fbbf036a88fc7be7438f6fc1c7606e8806064f933f7eb6d4f110bc622/pint_xarray-0.6.1-py3-none-any.whl
   name: pint-xarray

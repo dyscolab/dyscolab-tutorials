@@ -13,7 +13,7 @@ async with app.setup(hide_code=True):
         import micropip
 
         await micropip.install(
-            ["pint_pandas<=0.7", "typing_extensions>=4.15.0", "jablonski>=0.2.0", "matplotlib"],
+            ["pint_pandas<=0.7", "typing_extensions>=4.15.0", "jablonski>=0.3.1", "matplotlib"],
             verbose=False,
         )
 
@@ -77,7 +77,7 @@ def _():
             source=MLCT_3, target=ground, rate=1 / (0.6 * u.us) * 0.96
         )  # Non radiative decay from  MLCT_3 to ground
         isc = IntersystemCrossing(
-            source=MLCT_1, target=MLCT_3, rate=1 / (1 * u.ps) * 0.96
+            source=MLCT_1, target=MLCT_3, rate=1 / (1 * u.ps) 
         )  # Non radiative decay from  MLCT_1 to MLCT_3
 
     return (
@@ -237,10 +237,17 @@ def _(Ru_Os, Simulator, np, piecewise, pulse_excitation, u):
     pulse_2 = pulse_excitation(
         {Ru_Os.ru.abs: 1e25 / (u.cm**2 * u.s)}, width=5 * u.ns
     )
+
     sim_2 = Simulator(Ru_Os)
     result_2 = piecewise(sim_2, events=pulse_2, save_at=np.linspace(0, 30, 100)*u.ns)
     result_2.pint.dequantify().to_dataframe().plot()
     return (pulse_2,)
+
+
+@app.cell
+def _(Ru_Os, excitation, u):
+    excitation[Ru_Os.ru.abs].to(1/ (u.cm**2 * u.s))
+    return
 
 
 @app.cell(hide_code=True)
@@ -266,25 +273,55 @@ def _(Ru_Os, np, plt, pulse_2, spectral_time_resolved_emission, u):
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    We can also get the spectra, which we can sweep for a range of excitation intensities. We give it which excitation transition to pump and an array of intensities to sweep.
+    To get more realisic excitation we can use jablonki's helper functions. `pump_from_laser` allows us to calculate the resulting excitation whith the molecule in the center of a gaussian beam of a certatin width (as standard deviation), power, wavelength and linewidth.
     """)
     return
 
 
 @app.cell
-def _(Ru_Os, np, plt, u):
+def _(Ru_Os, u):
+    from jablonski.helpers import pump_from_laser, h, c
+
+    wavelngth = (h*c)/Ru_Os.ru.abs.energy_difference
+    excitation = pump_from_laser(Ru_Os, wavelength=wavelngth,linewidth=5*u.nm,  power= 1*u.W, width = 1*u.mm)
+    excitation
+    return excitation, pump_from_laser, wavelngth
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""
+    Since jablonski doesn't support line profiles yet the linewidth is taken as a simple tolerance: anything within it is pumped at full power and anything outside is ignored.
+
+    This can be combined with jablonski's sweep functions. We can get the emission spectra for different intensities by using the `sweep_emission_spectra` with pumps for different laser powers.
+    """)
+    return
+
+
+@app.cell
+def _(Ru_Os, np, plt, pump_from_laser, u, wavelngth):
     from jablonski.sweeps import sweep_emission_spectra
 
+    powers = np.logspace(-1,2, 20) * u.W # Powers to sweep 
+    excitations = [pump_from_laser(Ru_Os, wavelength=wavelngth,linewidth=5*u.nm,  power=power, width = 1*u.mm) for power in powers]
     steady = sweep_emission_spectra(
         Ru_Os,
-        excitations=[{Ru_Os.ru.abs: height} for height in np.logspace(21, 24, 20) / (u.cm**2 * u.s)]
+        excitations=excitations,
+        keys = powers,
     )  # Sweep steady state emission spectra
     df = steady.pint.dequantify().to_dataframe().T
     df.index = df.index.map(lambda x: x.magnitude)
     df.plot()
-    plt.xscale("log")
-    plt.yscale("log")
+    plt.xscale("log");plt.yscale("log"); plt.xlabel("Laser power [W]"); plt.ylabel("Emission [phtons / s]")
     plt.show()
+    return
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""
+    The `keys` attribute gives us the keys for our Dataset. If the excitation affects only one transition it can be omitted and defaults to the pump intensity, but in this case it makes more sense to use the laser power.
+    """)
     return
 
 
@@ -312,6 +349,9 @@ def _():
     - `Phosphorescence(excited: SpinState, ground: SpinState, rate: Parameter)`: A radiative transition between two electronic states of different spin multiplicity, emitting a photon, $T_1 \rightarrow S_0 + h\nu$.
 
     - `EnergyTransferUpconversion(sensitizer: SingletState, activator: SingletState, relaxator: SingletState, rate: Parameter)`: Two sensitizer molecules in an excited state transfer their combined energy to promote an activator to a higher state while a relaxator relaxes to a lower one, $2 \cdot \text{Sensitizer} \rightarrow \text{Activator} + \text{Relaxator}$.
+
+    - `EnergyTransferUpconversion4(sensitizer: SingletState, activator: SingletState, relaxator: SingletState, rate: Parameter)`: Two molecules in an excited state transfer their combined energy to promote an activator to a higher state while a sensitizer relaxes to a lower one, differen from `EnergyTransferUpconversion` in that both electrons can intially be in different levels, $\text{sensitizer\_high} + \text{activator\_low}  \rightarrow \text{sensitizer\_low} + \text{activator\_high}$.
+
 
     All transitions use `MassAction` kinetics. For example, `Fluorescence(excited=S1, ground=S0, rate=k)` gives:
 
