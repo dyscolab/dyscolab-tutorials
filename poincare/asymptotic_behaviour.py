@@ -7,7 +7,7 @@
 
 import marimo
 
-__generated_with = "0.21.1"
+__generated_with = "0.23.16"
 app = marimo.App(width="medium")
 
 async with app.setup(hide_code=True):
@@ -20,7 +20,7 @@ async with app.setup(hide_code=True):
         import micropip
 
         await micropip.install(
-            ["pint_pandas<=0.7", "typing_extensions>=4.15.0", "poincare>=1.1.2", "matplotlib"],
+            ["pint_pandas<=0.7", "typing_extensions>=4.15.0", "poincare>=1.2.0", "matplotlib"],
             verbose=False,
         )
 
@@ -124,14 +124,14 @@ def _(Pitchfork, np, sim, steady):
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    Since `values` only takes the values of the parameter to sweep, changes to initial conditions or values for other parameters in a sweep must be done at simulator creation level:
+    Since `values` only takes the values of the parameter to sweep, changes to initial conditions or values for other parameters in a sweep must be done on the simluator.
     """)
     return
 
 
 @app.cell
 def _(Pitchfork, Simulator, np, steady):
-    sim_p = Simulator(Pitchfork(x=-1))
+    sim_p = Simulator(Pitchfork).with_values({Pitchfork.x: -1})
     steady.sweep(sim_p, variable=Pitchfork.r, values=np.linspace(-10, 10, 100))[
         "x"
     ].to_dataframe().plot()

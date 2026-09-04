@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.20.2"
+__generated_with = "0.23.16"
 app = marimo.App(width="medium")
 
 async with app.setup(hide_code=True):
@@ -13,7 +13,7 @@ async with app.setup(hide_code=True):
         import micropip
 
         await micropip.install(
-            ["pint_pandas<=0.7", "typing_extensions>=4.15.0", "poincare>=1.1.2", "matplotlib"], verbose = False
+            ["pint_pandas<=0.7", "typing_extensions>=4.15.0", "poincare>=1.2.0", "matplotlib"], verbose = False
         )
 
 
@@ -63,7 +63,7 @@ def _():
 def _(DampedOscillator, Simulator):
     from poincare import solvers
 
-    result = Simulator(DampedOscillator).solve(solver=solvers.RK45(), save_at=range(3))
+    result = Simulator(DampedOscillator).with_solver(solvers.RK45()).solve(save_at=range(3))
     result
     return
 
@@ -94,14 +94,6 @@ def _(DampedOscillator, Simulator):
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    #### In marimo
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _():
-    mo.md(r"""
     ## Interactive simulators
 
     ### In marimo
@@ -118,8 +110,8 @@ def _():
 
 @app.cell
 def _(DampedOscillator, Simulator, np, slider):
-    Simulator(DampedOscillator).solve(
-        save_at=np.linspace(0, 10, 100), values={DampedOscillator.v: slider.value}
+    Simulator(DampedOscillator).with_values({DampedOscillator.v: slider.value}).solve(
+        save_at=np.linspace(0, 10, 100)
     ).to_dataframe().plot()
     return
 

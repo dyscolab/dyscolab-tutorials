@@ -8,7 +8,7 @@
 
 import marimo
 
-__generated_with = "0.21.1"
+__generated_with = "0.23.16"
 app = marimo.App(width="medium")
 
 async with app.setup(hide_code=True):
@@ -21,7 +21,7 @@ async with app.setup(hide_code=True):
         import micropip
 
         await micropip.install(
-            ["pint_pandas<=0.7", "typing_extensions>=4.15.0", "poincare>=1.1.2", "matplotlib"],
+            ["pint_pandas<=0.7", "typing_extensions>=4.15.0", "poincare>=1.2.0", "matplotlib"],
             verbose=False,
         )
 
@@ -32,11 +32,6 @@ def _():
     # Getting started with Poincare
     Poincare is a python library for declaring and simulating dynamical systems. Designed around the principle of modularity, composability and reproducibility, it's intended to create a layer to separate the actual declaration of models from their simulation, allowing to easily switch methods and backends. It also makes models composable, allowing the combination of smaller systems to create larger ones, and implements a series of analysis tools such as parameter sweeps to find steady states or limit cicles.
     """)
-    return
-
-
-@app.cell
-def _():
     return
 
 
@@ -143,7 +138,7 @@ def _(result):
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    We can change the initial conditions by passing a `values` dictionary to `solve`; it is possible to create more than one solution with different initial conditions from the same `Simulator`, avoiding model recompilation.
+    We can change the initial conditions by calling `with_values` on the simulator and passing a dictionary; it is possible to create more than one solution with different initial conditions from the same `Simulator`, avoiding model recompilation.
     """)
     return
 
@@ -151,10 +146,10 @@ def _():
 @app.cell
 def _(Model, Simulator):
     _sim = Simulator(Model)
-    result1 = _sim.solve(values={Model.x: 2}, save_at=range(3))
+    result1 = _sim.with_values({Model.x: 2}).solve(save_at=range(3))
     print("Result 1:  \n", result1)
-    result2 = _sim.solve(values={Model.x: 3}, save_at=range(3))
-    print("Result 2: \n", result2)
+    result2 = _sim.with_values({Model.x: 3}).solve(save_at=range(3))
+    print("Result 2: \n", result2) 
     return
 
 
@@ -211,7 +206,7 @@ def _():
     mo.md(r"""
     ## Transforming output
     We can compute transformations of the output
-    by passing a dictionary `transform = {"name": expression}` of expressions to calculate:
+    by passing calling `with_transform` on a `Simulator` and passing a dictionary `{"name": expression}` of expressions to calculate:
     """)
     return
 
@@ -219,14 +214,11 @@ def _():
 @app.cell
 def _(Oscillator, Simulator, np):
     # Compute kinetic and potential energy
-    result_2 = Simulator(
-        Oscillator,
-        transform={
+    result_2 = Simulator(Oscillator).with_transform({
             "x": Oscillator.x,
             "T": 1 / 2 * Oscillator.v**2,
             "V": 1 / 2 * Oscillator.x**2,
-        },
-    ).solve(save_at=np.linspace(0, 10, 100))
+        }).solve(save_at=np.linspace(0, 10, 100))
     result_2.to_dataframe().plot()
     return
 
@@ -234,8 +226,18 @@ def _(Oscillator, Simulator, np):
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    Note that the output will only save whatever is passed to transform, so the original variables must be explicitly passed in order to be included.
+    Note that the output will only save whatever is passed to transform, so the original variables must be explicitly passed in order to be included. This can be changed by setting `append = True` in `with_transform`.
     """)
+    return
+
+
+@app.cell
+def _(Oscillator, Simulator, np):
+    result_2_append = Simulator(Oscillator).with_transform({
+            "T": 1 / 2 * Oscillator.v**2,
+            "V": 1 / 2 * Oscillator.x**2,
+        }, append=True).solve(save_at=np.linspace(0, 10, 100))
+    result_2_append.to_dataframe().plot()
     return
 
 
@@ -280,7 +282,7 @@ def _():
 
 @app.cell
 def _(ModelXY, Simulator):
-    Simulator(ModelXY).solve(values={ModelXY.c: 2}, save_at=range(3))
+    Simulator(ModelXY).with_values({{ModelXY.c: 2}}).solve(save_at=range(3))
     return
 
 
@@ -294,7 +296,7 @@ def _():
 
 @app.cell
 def _(ModelXY, Simulator):
-    Simulator(ModelXY).solve(values={ModelXY.c: 2, ModelXY.y: 2}, save_at=range(3))
+    Simulator(ModelXY).with_values({ModelXY.c: 2, ModelXY.y: 2}).solve(save_at=range(3))
     return
 
 
@@ -326,12 +328,8 @@ def _(Simulator, System, Variable, assign, initial):
         eq = x.derive() << -p * x
 
     # We can use a value other than the default for parameter `p` when solving the system
-    Simulator(ParametrizedDecay).solve(
-        save_at=range(3), values={ParametrizedDecay.p: 0.5}
-    )
-    Simulator(ParametrizedDecay).solve(
-        save_at=range(3), values={ParametrizedDecay.p: 2}
-    )
+    Simulator(ParametrizedDecay).with_values({ParametrizedDecay.p: 0.5}).solve(save_at=range(3))
+    Simulator(ParametrizedDecay).with_values({ParametrizedDecay.p: 2}).solve(save_at=range(3))
     return Parameter, ParametrizedDecay
 
 
@@ -369,10 +367,7 @@ def _():
 @app.cell
 def _(ParametrizedForce, Simulator, real):
     try:
-        Simulator(ParametrizedForce).solve(
-            save_at=range(3),
-            values={ParametrizedForce.Force: real.cos(ParametrizedForce.x)},
-        )
+        Simulator(ParametrizedForce).with_values({ParametrizedForce.Force: real.cos(ParametrizedForce.x)}).solve(save_at=range(3))
     except ValueError as ve:
         # Poincare Raises a ValueError when the functional dependece of a parameter is changed
         print("ValueError:", ve)
@@ -450,7 +445,7 @@ def _():
 
 
 @app.cell
-def _(Derivative, Parameter, Simulator, System, Variable, assign, initial):
+def _(Derivative, Parameter, Simulator, System, Variable, assign, initial, np):
     import pint
 
     unit = pint.UnitRegistry()

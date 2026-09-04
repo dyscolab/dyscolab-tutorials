@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.20.2"
+__generated_with = "0.23.16"
 app = marimo.App(width="medium")
 
 async with app.setup(hide_code=True):
@@ -238,7 +238,7 @@ def _():
 @app.cell
 def _(Repressilator, np, sim_2):
     sim_2.solve(
-        save_at=np.linspace(0, 100, 1000),
+        save_at=np.linspace(0, 50, 500),
         values={
             Repressilator.m1: 1,
             Repressilator.m2: 2,
@@ -298,7 +298,6 @@ def _():
 def _(result_2):
     result_2.sel(quantity=["amplitude"]).to_dataarray().plot(marker=".")
     result_2.sel(quantity=["difference_rms"]).to_dataarray().plot(marker=".")
-
     return
 
 
