@@ -28,17 +28,12 @@ seaborn = "*"
 [pypi-dependencies]
 rebop = "*"
 
-# [feature.pypi.pypi-dependencies]
-# symbolite = ">=1.2.0"
-# poincare = ">=1.2.0"
-# simbio = ">= 1.1.1"
-# jablonski = ">= 0.3.1"
-
 [feature.pypi.pypi-dependencies]
-symbolite = { path = "../u2602/symbolite", editable = true }
-poincare = { path = "../u2602/poincare", editable = true }
-simbio = { path = "../u2602/simbio", editable = true }
-jablonski = { path = "../u2602/jablonski", editable = true }
+symbolite = ">=1.1.1"
+poincare = ">=1.2.0"
+simbio = ">= 1.2.0"
+jablonski = ">= 0.4.0"
+
 
 [feature.local.pypi-dependencies]
 # symbolite = { path = "../u2602/symbolite", editable = true }

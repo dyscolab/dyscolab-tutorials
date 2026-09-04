@@ -6377,7 +6377,7 @@ packages:
 - pypi: ../u2602/jablonski
   name: jablonski
   requires_dist:
-  - poincare>=1.1.2
+  - poincare>=1.2.0
   requires_python: '>=3.12'
 - pypi: ../u2602/poincare
   name: poincare
