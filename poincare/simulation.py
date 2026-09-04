@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.23.16"
+__generated_with = "0.24.0"
 app = marimo.App(width="medium")
 
 async with app.setup(hide_code=True):
@@ -128,9 +128,12 @@ def _():
 
 @app.cell
 def _(DampedOscillator, Simulator, np):
-    result4 = Simulator(DampedOscillator).interact(
-        save_at=np.linspace(0, 10, 100), values={DampedOscillator.k: (0, 10, 0.1)}
-    )
+    try:
+        result4 = Simulator(DampedOscillator).interact(
+            save_at=np.linspace(0, 10, 100), values={DampedOscillator.k: (0, 10, 0.1)}
+        )
+    except ImportError as e:
+        print(f"ImportError: {e}")
     return
 
 
