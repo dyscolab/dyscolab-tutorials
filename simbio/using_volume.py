@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.20.2"
+__generated_with = "0.23.16"
 app = marimo.App(width="medium")
 
 async with app.setup(hide_code=True):
@@ -13,7 +13,7 @@ async with app.setup(hide_code=True):
         import micropip
 
         await micropip.install(
-            ["pint_pandas<=0.7", "typing_extensions>=4.15.0", "simbio>=1.1.0", "matplotlib"], verbose = False
+            ["pint_pandas<=0.7", "typing_extensions>=4.15.0", "simbio>=1.2.0", "matplotlib"], verbose = False
         )
 
 
@@ -84,9 +84,9 @@ def _():
 
 
 @app.cell
-def _(Model, Simulator, np):
+def _(Model, Simulator, np, u):
     sim = Simulator(Model)
-    sim.solve(save_at=np.linspace(1,5, 50)).to_dataframe().plot()
+    sim.solve(save_at=np.linspace(1,5, 50)* u.s).pint.dequantify().to_dataframe().plot()
     return
 
 
@@ -135,9 +135,9 @@ def _():
 
 
 @app.cell
-def _(Model2, Simulator, np):
+def _(Model2, Simulator, np, u):
     sim_2 = Simulator(Model2)
-    sim_2.solve(save_at=np.linspace(1,5, 50)).to_dataframe().plot()
+    sim_2.solve(save_at=np.linspace(1,5, 50)* u.s).pint.dequantify().to_dataframe().plot()
     return
 
 
@@ -174,7 +174,7 @@ def _(
         r2 = MassAction(reactants = [2*A, B], products = [AB], rate = 0.2*u.mol/u.L/u.s * (u.mol/u.L)**-3) # 2*A -> B at mass action rate
         v_eq = V.derive() << expansion_rate # V' = 1 
     sim_3 = Simulator(Model3)
-    sim_3.solve(save_at=np.linspace(0,5,50)).to_dataframe().plot()
+    sim_3.solve(save_at=np.linspace(0,5,50)* u.s).pint.dequantify().to_dataframe().plot()
     return
 
 
@@ -211,8 +211,8 @@ def _(
 
         r2 = MassAction(reactants = [2*A, B], products = [AB], rate = 0.2*u.mol/u.L/u.s * (u.mol/u.L)**-3) # 2*A -> B at mass action rate
         v_eq = V.derive() << expansion_rate # V' = 1
-    sim_4 = Simulator(Model4, transform = {"A": Model4.A/Model4.V, "B": Model4.B, "AB": Model4.AB/Model4.V, "V": Model4.V })
-    sim_4.solve(save_at=np.linspace(0,5,50)).to_dataframe().plot()
+    sim_4 = Simulator(Model4).with_transform({"A": Model4.A/Model4.V, "B": Model4.B, "AB": Model4.AB/Model4.V, "V": Model4.V })
+    sim_4.solve(save_at=np.linspace(0,5,50)* u.s).pint.dequantify().to_dataframe().plot()
     return
 
 
@@ -244,7 +244,7 @@ def _(Compartment, Species, Volume, amount, volume):
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    This also prevents ambiguity: it's wouldn't be clear in a reaction wether `A` should use Internal's or External's volume. The passing of regular `Parameters` and `Variables` is allowed:
+    This also prevents ambiguity: it's wouldn't be clear in a reaction wether `A` should use Internal's or External's volume. Passing regular `Parameters` and `Variables` is allowed:
     """)
     return
 

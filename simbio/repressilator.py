@@ -13,7 +13,7 @@ async with app.setup(hide_code=True):
         import micropip
 
         await micropip.install(
-            ["pint_pandas<=0.7", "typing_extensions>=4.15.0", "simbio>=1.1.0", "matplotlib"],
+            ["pint_pandas<=0.7", "typing_extensions>=4.15.0", "simbio>=1.2.0", "matplotlib"],
             verbose=False,
         )
 
@@ -24,6 +24,7 @@ def _():
     # Implementing the repressilator in Simbio
     The [repressilator](https://en.wikipedia.org/wiki/Repressilator) is a genetic regulatory network where 3 mRNA species $m_1$, $m_2$, $m_3$ interact with 3 proteins $p_1$, $p_2$, $p_3$. We can model it using the equations:
 
+    $$
     \begin{aligned}
     \frac{dm_1}{dt} &=  -m_1 + \frac{\alpha}{1+p_3^n} + \alpha_0 \quad \frac{dp_1}{dt} &= - \beta (p_1-m_1)  \\
     \frac{dm_2}{dt} &=  -m_2 + \frac{\alpha}{1+p_1^n} + \alpha_0 \quad \frac{dp_2}{dt} &= - \beta (p_2-m_2) \\
@@ -230,16 +231,14 @@ def _(EfficientRepressilator, Repressilator, Simulator, np, plt):
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    And we get the same output from both. We disappointingly don't get oscillations since all initial conditions are equal. We can change them by passing a `values` dictionary to `solve`; it can also include values for parameters such as $\alpha$.
+    And we get the same output from both. We disappointingly don't get oscillations since all initial conditions are equal. We can change them by calling `with_values()` on the Simulator; it can also include values for parameters such as $\alpha$.
     """)
     return
 
 
 @app.cell
 def _(Repressilator, np, sim_2):
-    sim_2.solve(
-        save_at=np.linspace(0, 50, 500),
-        values={
+    sim_2.with_values({
             Repressilator.m1: 1,
             Repressilator.m2: 2,
             Repressilator.m3: 3,
@@ -248,7 +247,8 @@ def _(Repressilator, np, sim_2):
             Repressilator.p3: 6,
             Repressilator.alpha: 200,
             Repressilator.beta: 5,
-        },
+        },).solve(
+        save_at=np.linspace(0, 50, 500),
     ).to_dataframe().plot()
     return
 
@@ -276,13 +276,13 @@ def _(Repressilator, Simulator, np):
         T_min=1,  # Minimum period expected
         T_max=20,  # Maximum period expected
         variables=Repressilator.m1,  # Variable to look at, can be an iterable with multiple variables
-        parameter=Repressilator.beta,
-        values=np.linspace(5, 20, 15),
+        parameter=Repressilator.beta,  # Parameter to sweep
+        values=np.linspace(5, 20, 15), # Values taken on by parameter
     )
 
     result_2.sel(quantity="period").to_dataframe().plot(
         style="--."
-    )  # Parameter to sweep  # Values taken on by parameter
+    )  
     return (result_2,)
 
 

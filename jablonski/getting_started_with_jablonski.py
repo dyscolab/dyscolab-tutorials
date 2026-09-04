@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.23.16"
+__generated_with = "0.24.0"
 app = marimo.App(width="medium")
 
 async with app.setup(hide_code=True):
@@ -241,7 +241,7 @@ def _(Ru_Os, Simulator, np, piecewise, pulse_excitation, u):
     sim_2 = Simulator(Ru_Os)
     result_2 = piecewise(sim_2, events=pulse_2, save_at=np.linspace(0, 30, 100)*u.ns)
     result_2.pint.dequantify().to_dataframe().plot()
-    return (pulse_2,)
+    return pulse_2, sim_2
 
 
 @app.cell
@@ -259,9 +259,9 @@ def _():
 
 
 @app.cell
-def _(Ru_Os, np, plt, pulse_2, spectral_time_resolved_emission, u):
+def _(np, plt, pulse_2, sim_2, spectral_time_resolved_emission, u):
     spectral = spectral_time_resolved_emission(
-        Ru_Os, excitation=pulse_2, save_at=np.linspace(0, 30, 100) * u.ns
+        sim_2, excitation=pulse_2, save_at=np.linspace(0, 30, 100) * u.ns
     )  # Time resolved emission
     spectral.pint.dequantify().to_dataframe().plot()
     plt.yscale("log")
@@ -299,13 +299,13 @@ def _():
 
 
 @app.cell
-def _(Ru_Os, np, plt, pump_from_laser, u, wavelngth):
+def _(Ru_Os, np, plt, pump_from_laser, sim_2, u, wavelngth):
     from jablonski.sweeps import sweep_emission_spectra
 
     powers = np.logspace(-1,2, 20) * u.W # Powers to sweep 
     excitations = [pump_from_laser(Ru_Os, wavelength=wavelngth,linewidth=5*u.nm,  power=power, width = 1*u.mm) for power in powers]
     steady = sweep_emission_spectra(
-        Ru_Os,
+        sim_2,
         excitations=excitations,
         keys = powers,
     )  # Sweep steady state emission spectra
@@ -369,9 +369,9 @@ def _():
 
     - `piecewise(sim: Simulator, events: dict[Time, Mapping], save_at: NDArray)`: Low-level solver that integrates a `Simulator` across a sequence of time segments, applying parameter changes at each event boundary. Returns an xarray `Dataset`.
 
-    - `time_resolved_emission(system: SpectroscopicSystem, excitation: dict, save_at: NDArray, kind: SpectraKind = "emission")`: Simulates total emission intensity over time for all radiative transitions in `system`, summed across all emission lines. Returns an xarray `Dataset` with a single `emission` variable.
+    - `time_resolved_emission(sim: Simulator, excitation: dict, save_at: NDArray, kind: SpectraKind = "emission")`: Simulates total emission intensity over time for all radiative transitions in `system`, summed across all emission lines. Returns an xarray `Dataset` with a single `emission` variable.
 
-    - `spectral_time_resolved_emission(system: SpectroscopicSystem, excitation: dict, save_at: NDArray, kind: SpectraKind = "emission", join_by_energy: bool = False)`: Like `time_resolved_emission`, but returns each emission line separately. If `join_by_energy=True`, lines sharing the same energy difference are summed together. Returns an xarray `Dataset`.
+    - `spectral_time_resolved_emission(sim: Simulator, excitation: dict, save_at: NDArray, kind: SpectraKind = "emission", join_by_energy: bool = False)`: Like `time_resolved_emission`, but returns each emission line separately. If `join_by_energy=True`, lines sharing the same energy difference are summed together. Returns an xarray `Dataset`.
 
 
     **Excitation creators** build event dictionaries to be passed to simulation functions:
@@ -384,23 +384,23 @@ def _():
 
     **Steady-state simulation** functions compute the long-time equilibrium of the system under continuous excitation:
 
-    - `steady_state_emission(system: SpectroscopicSystem, excitation: dict, kind: SpectraKind = "emission")`: Computes total steady-state emission intensity, summed over all radiative transitions. Returns an xarray `Dataset` with a single `emission` variable.
+    - `steady_state_emission(sim: Simulator, excitation: dict, kind: SpectraKind = "emission")`: Computes total steady-state emission intensity, summed over all radiative transitions. Returns an xarray `Dataset` with a single `emission` variable.
 
-    - `spectral_steady_state_emission(system: SpectroscopicSystem, excitation: dict, kind: SpectraKind = "emission", join_by_energy: bool = False)`: Like `steady_state_emission`, but returns each emission line separately, optionally accepting multiple simultaneous excitation sources. If `join_by_energy=True`, lines sharing the same energy difference are summed together. Returns an xarray `Dataset` with a dictionary mapping the line's key to the actual pint quantity representing the enrgy in `Dataset.attrs`.
+    - `spectral_steady_state_emission(sim: Simulator, excitation: dict, kind: SpectraKind = "emission", join_by_energy: bool = False)`: Like `steady_state_emission`, but returns each emission line separately, optionally accepting multiple simultaneous excitation sources. If `join_by_energy=True`, lines sharing the same energy difference are summed together. Returns an xarray `Dataset` with a dictionary mapping the line's key to the actual pint quantity representing the enrgy in `Dataset.attrs`.
 
     **Spectra** functions compute emission and excitation spectra as a function of wavelength:
 
-    - `emission_spectra(system: SpectroscopicSystem, excitation: dict, unit: str | Unit = u.nm, kind: SpectraKind = "emission")`: Computes a CW emission spectrum, converting energy differences to wavelengths in the given `unit`. Returns an xarray `DataArray` indexed by wavelength.
+    - `emission_spectra(sim: Simulator, excitation: dict, unit: str | Unit = u.nm, kind: SpectraKind = "emission")`: Computes a CW emission spectrum, converting energy differences to wavelengths in the given `unit`. Returns an xarray `DataArray` indexed by wavelength.
 
-    - `widened_emission_spectra(system: SpectroscopicSystemexcitation: dict, unit: str | Unit = u.nm, kind: SpectraKind = "emission", samples: Iterable[float] = np.linspace(380, 700, 1000), width: float = 5)`: Like `emission_spectra`, but broadens each discrete emission line into a Gaussian of standard deviation `width` and evaluates the result over `samples`, mostly useful to generate plots manually (altough `plots.graph_spectra` can be uesd for that). Returns an xarray `DataArray` indexed by wavelength.
+    - `widened_emission_spectra(sim: Simulator, excitation: dict, unit: str | Unit = u.nm, kind: SpectraKind = "emission", samples: Iterable[float] = np.linspace(380, 700, 1000), width: float = 5)`: Like `emission_spectra`, but broadens each discrete emission line into a Gaussian of standard deviation `width` and evaluates the result over `samples`, mostly useful to generate plots manually (altough `plots.graph_spectra` can be uesd for that). Returns an xarray `DataArray` indexed by wavelength.
 
-    - `excitation_emission_matrix(system: SpectroscopicSystem, height: float | Iterable[float], unit: str | Unit = u.nm)`: Computes a emission spectra for every `Pumper` in `system`, returning the full excitation-emission matrix as an xarray `Dataset` keyed by pumper excited.
+    - `excitation_emission_matrix(sim: Simulator, height: float | Iterable[float], unit: str | Unit = u.nm)`: Computes a emission spectra for every `Pumper` in `system`, returning the full excitation-emission matrix as an xarray `Dataset` keyed by pumper excited.
 
-    - `excitation_spectra(system: SpectroscopicSystem, emission: float | int | Quantity, height: float | Iterable[float], unit: str | Unit = u.nm)`: Extracts a slice of the excitation-emission matrix at a fixed emission wavelength, returning intensity as a function of excitation source. Returns an xarray `DataArray` indexed by pumper.
+    - `excitation_spectra(sim: Simulator, emission: float | int | Quantity, height: float | Iterable[float], unit: str | Unit = u.nm)`: Extracts a slice of the excitation-emission matrix at a fixed emission wavelength, returning intensity as a function of excitation source. Returns an xarray `DataArray` indexed by pumper.
 
     ### Graphical output
 
-    - `graph_spectra(system: SpectroscopicSystem, excitation: dict, unit: str | Unit = u.nm, kind: SpectraKind = "emission", samples: Iterable[float] = np.linspace(380, 700, 1000), width: float = 5)`: Plots a widened emission spectrum as a wavelength-colored line, with wavelength on the x-axis and emission intensity in photons on the y-axis. Returns a `(fig, ax)` tuple.
+    - `graph_spectra(sim: Simulator, excitation: dict, unit: str | Unit = u.nm, kind: SpectraKind = "emission", samples: Iterable[float] = np.linspace(380, 700, 1000), width: float = 5)`: Plots a widened emission spectrum as a wavelength-colored line, with wavelength on the x-axis and emission intensity in photons on the y-axis. Returns a `(fig, ax)` tuple.
 
 
     - `jablonski_diagram(system: SpectroscopicSystem, figsize: tuple[Number, Number] = (6.4, 4.8), fontsize: Number = 10, show_energy_axis: bool = True, unit: str | Unit = u.eV)`: Renders a Jablonski diagram for `system`, organizing states into singlet and triplet columns with energy on the y-axis in the given `unit`. Radiative and non-radiative transitions are drawn distinctly by a straight and wiggly line respectively. Returns a `(fig, ax)` tuple.

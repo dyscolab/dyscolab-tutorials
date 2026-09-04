@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.21.1"
+__generated_with = "0.23.16"
 app = marimo.App(width="medium")
 
 async with app.setup(hide_code=True):
@@ -13,7 +13,7 @@ async with app.setup(hide_code=True):
         import micropip
 
         await micropip.install(
-            ["pint_pandas<=0.7", "typing_extensions>=4.15.0", "simbio>=1.1.0", "matplotlib"], verbose = False
+            ["pint_pandas<=0.7", "typing_extensions>=4.15.0", "simbio>=1.2.0", "matplotlib"], verbose = False
         )
 
 
@@ -130,14 +130,14 @@ def _(result):
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    We can vary initial conditions by passing a `values` dictionary to the `solve()`
+    We can vary initial conditions by calling `with_values()` on the solve and passing it a dictionary with inital conditions.
     """)
     return
 
 
 @app.cell
 def _(Model, sim):
-    sim.solve(save_at=range(3), values={Model.A: 2, Model.B: 0.5}).to_dataframe().plot()
+    sim.with_values({Model.A: 2, Model.B: 0.5}).solve(save_at=range(3)).to_dataframe().plot()
     return
 
 
@@ -238,7 +238,7 @@ def _():
 
 @app.cell
 def _(ModelConst, Simulator):
-    Simulator(ModelConst).solve(values={ModelConst.c: 2}, save_at=range(3))
+    Simulator(ModelConst).with_values({ModelConst.c: 2}).solve(save_at=range(3))
     return
 
 
@@ -252,9 +252,7 @@ def _():
 
 @app.cell
 def _(ModelConst, Simulator):
-    Simulator(ModelConst).solve(
-        values={ModelConst.c: 2, ModelConst.B: 3}, save_at=range(3)
-    )
+    Simulator(ModelConst).with_values({ModelConst.c: 2}).solve(save_at=range(3))
     return
 
 
@@ -291,8 +289,8 @@ def _(RateLaw, Simulator, System, Variable, assign, initial):
 
         reaction = RateLaw(reactants=[2 * A, B], products=[C], rate_law=rate)
 
-    Simulator(ModelParametrized).solve(
-        save_at=range(3), values={ModelParametrized.rate: 3}
+    Simulator(ModelParametrized).with_values({ModelParametrized.rate: 3}).solve(
+        save_at=range(3)
     )
     return
 

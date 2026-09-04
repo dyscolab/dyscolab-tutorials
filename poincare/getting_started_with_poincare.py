@@ -138,7 +138,7 @@ def _(result):
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    We can change the initial conditions by calling `with_values` on the simulator and passing a dictionary; it is possible to create more than one solution with different initial conditions from the same `Simulator`, avoiding model recompilation.
+    We can change the initial conditions by calling `with_values()` on the simulator and passing a dictionary; it is possible to create more than one solution with different initial conditions from the same `Simulator`, avoiding model recompilation.
     """)
     return
 
@@ -206,7 +206,7 @@ def _():
     mo.md(r"""
     ## Transforming output
     We can compute transformations of the output
-    by passing calling `with_transform` on a `Simulator` and passing a dictionary `{"name": expression}` of expressions to calculate:
+    by passing calling `with_transform()` on a `Simulator` and passing a dictionary `{"name": expression}` of expressions to calculate:
     """)
     return
 
@@ -226,7 +226,7 @@ def _(Oscillator, Simulator, np):
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    Note that the output will only save whatever is passed to transform, so the original variables must be explicitly passed in order to be included. This can be changed by setting `append = True` in `with_transform`.
+    Note that the output will only save whatever is passed to transform, so the original variables must be explicitly passed in order to be included. This can be changed by setting `append = True` in `with_transform()`.
     """)
     return
 
