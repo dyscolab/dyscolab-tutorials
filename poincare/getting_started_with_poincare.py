@@ -8,7 +8,7 @@
 
 import marimo
 
-__generated_with = "0.23.16"
+__generated_with = "0.24.0"
 app = marimo.App(width="medium")
 
 async with app.setup(hide_code=True):
@@ -282,7 +282,7 @@ def _():
 
 @app.cell
 def _(ModelXY, Simulator):
-    Simulator(ModelXY).with_values({{ModelXY.c: 2}}).solve(save_at=range(3))
+    Simulator(ModelXY).with_values({ModelXY.c: 2}).solve(save_at=range(3))
     return
 
 
