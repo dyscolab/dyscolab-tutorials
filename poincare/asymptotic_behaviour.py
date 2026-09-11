@@ -7,7 +7,7 @@
 
 import marimo
 
-__generated_with = "0.23.16"
+__generated_with = "0.24.0"
 app = marimo.App(width="medium")
 
 async with app.setup(hide_code=True):
@@ -453,6 +453,104 @@ def _(LotkaVolterra, np, osc, sim_4):
         variables=[LotkaVolterra.prey],
     )
     result_7
+    return
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""
+    ## Parameter fits
+    Poincare's `fit_result` function allows us to fit model parameters to experimental or expected results. First we define a model to fit.
+    """)
+    return
+
+
+@app.cell
+def _(Derivative, Parameter, Simulator, System, Variable, assign, initial, np):
+    from poincare.analysis import fit_result
+
+    class Oscillator(System):
+        x: Variable = initial(default=1)
+        vx: Derivative = x.derive(initial=0)
+
+        omega: Parameter = assign(default=1)
+        k: Parameter = assign(default=2)
+
+
+        spring = vx.derive() << -omega**2 * x
+
+    sim_5 = Simulator(Oscillator) 
+    ds = sim_5.solve(save_at=np.linspace(0,10,100))
+    ds.to_dataframe().plot()
+    return Oscillator, fit_result, sim_5
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""
+    We also need a target to fit to. In this case we can use the known result for the harmonic oscillator. We can also fit arbitrary functions of our variables and parameters using by adding a `transform` to our `Simulator`; for our example we'll calculate the energy and have it fit to it's expected constant value.
+    """)
+    return
+
+
+@app.cell
+def _(Oscillator, np, plt, sim_5):
+    sim_t = sim_5.with_transform({"E": 1/2 * Oscillator.vx**2 + 1/2 * Oscillator.omega * Oscillator.x**2}, append=True)
+
+    t = np.linspace(0,10,100) # Times to fit
+    omega_real = 2 # "Actual" omega
+    target_x = np.cos(omega_real*t)
+    target_E = np.full_like(target_x,1/2 * omega_real*2 * target_x[0]**2)
+    plt.plot(t, target_x, label = "x")
+    plt.plot(t, target_E, label = "E")
+    plt.xlabel("time"); plt.legend(), 
+    return omega_real, sim_t, t, target_E, target_x
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""
+    To pass it to fit result we need to wrap it in an xarray `Dataset` in a format similar to simulation results, or we can use the `make_target` function where we pass the simulation times and a dictionary of {variables/transform expression: target_values}
+    """)
+    return
+
+
+@app.cell
+def _(Oscillator, t, target_E, target_x):
+    from poincare.analysis.fits import make_target
+
+    target = make_target(results={"E": 2*target_E, Oscillator.x: target_x}, save_at= t) # Target for fit
+    target
+    return (target,)
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""
+    Which we pass to `fit_result`. We must also give it a `Simulator` with our transform and a dictionary `p0` which tells it what parameters to fit: we can pass either an initial guess or a tuple `(initial guess, lower bound, upper bound)` to add bounds.
+    """)
+    return
+
+
+@app.cell
+def _(Oscillator, fit_result, np, omega_real, sim_t, target):
+    fit = fit_result(sim=sim_t, results=target, p0 = {Oscillator.omega: omega_real*1.1, Oscillator.x: (None, -np.inf, 10)})
+    fit
+    return
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""
+    As an optional parameter we can also pass a `scale` dictionary to change how the different variables we are fitting are weighed. In this case we could set `scale = {"E": 0.5}` to weigh the error in energy half as much as the error in other variables.
+    """)
+    return
+
+
+@app.cell
+def _(Oscillator, fit_result, np, omega_real, sim_t, target):
+    scaled_fit = fit_result(sim=sim_t, results=target, p0 = {Oscillator.omega: omega_real*1.1, Oscillator.x: (None, -np.inf, 10)})
+    scaled_fit
     return
 
 
