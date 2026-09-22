@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.21.1"
+__generated_with = "0.23.16"
 app = marimo.App(width="medium")
 
 async with app.setup(hide_code=True):
@@ -144,24 +144,29 @@ def _():
 @app.cell
 def _(CellInteraction, Sweeper, get_refractory, np, plt, sim):
     sweeper = Sweeper(func=get_refractory)
+
+    def log_spacing(low, high, n):
+        """Logarithmically spaced values between given values"""
+        return np.logspace(np.log10(low), np.log10(high), n)
+
     refractory_period = sweeper.sweep(
         sim=sim,
         save_at=np.linspace(0, 50, 1000),
         parameter=CellInteraction.g,
-        values=np.linspace(
-            0.1, 2, 50
+        values=log_spacing(
+            0.1, 2, 20
         ),  # Parameter sweep range from the paper's supplementary materials
     )  # Run the sweep, we pass a save_at for each simulation run and values to sweep the parameter
     refractory_period.to_dataframe().plot(ls="--", marker=".")
     plt.ylabel("Refractory period")
     plt.show()
-    return (refractory_period,)
+    return log_spacing, refractory_period
 
 
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    And calculate and plot the sensitivity $\frac{d\log(R)}{d\log(g)}$.
+    And calculate the average sensitivity $\frac{d\log(R)}{d\log(g)}$.
     """)
     return
 
@@ -172,16 +177,23 @@ def _(np, plt, refractory_period):
         np.log(refractory_period["result"].values),
         np.log(refractory_period["g"].values),
     )
+
+
     plt.plot(refractory_period["g"].values, sensitivity, "--.")
     plt.xlabel("g")
     plt.ylabel("Sensitivity")
+
+    average_rp_sensitivity = np.mean(sensitivity)
+    print(f"Refractory period sensitivity in g: {average_rp_sensitivity:.2f}")
+
+    plt.show()
     return
 
 
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    Although the numerical derivative shows some instability the sensitivity oscillates around -1, the value given in Figure 6.E. of the paper.
+    Although the numerical derivative shows some instability the sensitivity oscillates around the average value of -0.97, the same as the value given in Figure 6.E. of the paper.
 
     We can run a similar analysis from the pulse amplitude. Since the initial conditions change depending on the parameters to make them comparable we can wrap our System and use `Constant` to ensure they are properly linked.
     """)
@@ -209,7 +221,7 @@ def _(CellInteraction, Simulator, System, assign, np):
         )
 
         # Instantiating a models adds all its variables, equations and parameters. We can pass values and initial conditions
-        int = CellInteraction(a=a, b=b, c=c, d=d, f=f, g=g, X=threshold_110, Y=0.0025)
+        int = CellInteraction(a=a, b=b, c=c, d=d, f=f, g=g, X=threshold_110, Y=0.1)
 
     lsim = Simulator(LinkedCellInteraction)
     lsim.solve(save_at=np.linspace(0, 10, 100))
@@ -225,7 +237,7 @@ def _():
 
 
 @app.cell
-def _(LinkedCellInteraction, Sweeper, lsim, np):
+def _(LinkedCellInteraction, Sweeper, log_spacing, lsim, np):
     def get_pulse_amplitude(simulation_result):
         """Calculates pulse amplitude from simulation result by looking for maximum X concentration
         and checking it has decayed at least 10% from peak by the time the simulation ends"""
@@ -241,7 +253,7 @@ def _(LinkedCellInteraction, Sweeper, lsim, np):
         sim=lsim,
         save_at=np.arange(0, 3, 0.001),
         parameter=(LinkedCellInteraction.a),
-        values=np.linspace(0.5, 2.5, 50),
+        values=log_spacing(0.5, 2.5, 20),
     )
     pulse_amplitude
     return amp_sweeper, pulse_amplitude
@@ -294,67 +306,61 @@ def _():
 
 
 @app.cell
-def _(LinkedCellInteraction, amp_sensitivity, amp_sweeper, lsim, np, plt):
+def _(
+    LinkedCellInteraction,
+    amp_sensitivity,
+    amp_sweeper,
+    log_spacing,
+    lsim,
+    np,
+    plt,
+):
     ranges = {
-        LinkedCellInteraction.b: np.linspace(0.1, 5, 50),
-        LinkedCellInteraction.c: np.linspace(200, 500, 50),
-        LinkedCellInteraction.d: np.linspace(
-            0.2, 10, 50
-        ),  # d range start changed from 0.01 to 0.1 since pulse wasn't seen
-        LinkedCellInteraction.f: np.linspace(0.1, 2.5, 50),
-        LinkedCellInteraction.g: np.linspace(0.1, 10, 50),
+        LinkedCellInteraction.b: log_spacing(0.1, 5, 20),
+        LinkedCellInteraction.c: log_spacing(20, 500, 20),
+        LinkedCellInteraction.d: log_spacing(0.01, 10, 20),  # d range start changed from 0.01 to 0.1 since pulse wasn't seen
+        LinkedCellInteraction.f: log_spacing(0.1, 2.5, 20),
+        LinkedCellInteraction.g: log_spacing(0.1, 10, 20),
     }
     results = {LinkedCellInteraction.a: amp_sensitivity}  # Include previous result
     all_verified = True
     for var, values in ranges.items():
         sweep_result = amp_sweeper.sweep(
-            sim=lsim, save_at=np.arange(0, 25, 0.001), parameter=var, values=values
+            sim=lsim, save_at=np.arange(0, 500, 0.001), parameter=var, values=values
         )
         results[var] = np.gradient(
             np.log(sweep_result["max"].values), np.log(sweep_result[str(var)].values)
         )
         all_verified = all_verified and np.all(sweep_result["verified"].values)
 
-    for var, res in results.items():
-        plt.plot(np.linspace(0, 1, 50), res, "--.", label=str(var))
-    plt.xlabel("Parameter value (normalized to 0-1)")
-    plt.ylabel("Pulse amplitude sensitivity")
-    plt.legend()
     print(f"All simulations decayed at least 10% from maximum: {all_verified}")
+
+    for var, res in results.items():
+        plt.plot(log_spacing(1, 10, 20), res, "--.", label=str(var))
+    plt.xlabel("Parameter value (normalized to 0-1, log scale)")
+    plt.ylabel("Pulse amplitude sensitivity")
+    plt.xscale("log")
+    plt.xticks([])
+    plt.legend()
     plt.show()
-    return ranges, results
+
+    return (results,)
 
 
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    We can now get the sensitivity around the parameter values given in Figure 6.E. from the full result to make a similar bar chart.
+    We can now get the average sensitivity around in the swept ranges to make bar chart similar to the one in in Figure 6.E.
     """)
     return
 
 
 @app.cell
-def _(LinkedCellInteraction, np, plt, pulse_amplitude, ranges, results):
-    full_ranges = {
-        LinkedCellInteraction.a: pulse_amplitude["a"].values
-    } | ranges  # Parameter a wasn't included in ranges
-    central_parameters = {
-        LinkedCellInteraction.a: 1,
-        LinkedCellInteraction.b: 1,
-        LinkedCellInteraction.c: 100,
-        LinkedCellInteraction.d: 2,
-        LinkedCellInteraction.f: 1,
-        LinkedCellInteraction.g: 1,
-    }
-    central_values = np.array(
-        [
-            results[param][np.argmin(np.abs(full_ranges[param] - val))]
-            for param, val in central_parameters.items()
-        ]
-    )  # Get sensitvity at parameter value closest to central value
-    plt.bar(range(len(central_values)), central_values)
+def _(np, plt, results):
+    average_values = np.array([np.mean(result) for result in results.values()])  
+    plt.bar(range(len(average_values)), average_values)
     plt.xticks(
-        range(len(central_values)), [str(param) for param in central_parameters.keys()]
+        range(len(average_values)), [str(param) for param in results.keys()]
     )
     plt.show()
     return
