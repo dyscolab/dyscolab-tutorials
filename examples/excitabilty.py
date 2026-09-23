@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.23.16"
+__generated_with = "0.24.2"
 app = marimo.App(width="medium")
 
 async with app.setup(hide_code=True):
@@ -184,7 +184,7 @@ def _(np, plt, refractory_period):
     plt.ylabel("Sensitivity")
 
     average_rp_sensitivity = np.mean(sensitivity)
-    print(f"Refractory period sensitivity in g: {average_rp_sensitivity:.2f}")
+    print(f"Average Refractory period sensitivity to g: {average_rp_sensitivity:.2f}")
 
     plt.show()
     return
@@ -343,14 +343,13 @@ def _(
     plt.xticks([])
     plt.legend()
     plt.show()
-
     return (results,)
 
 
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    We can now get the average sensitivity around in the swept ranges to make bar chart similar to the one in in Figure 6.E.
+    We can now get the average sensitivity in the swept ranges to make bar chart similar to the one in in Figure 6.E.
     """)
     return
 
