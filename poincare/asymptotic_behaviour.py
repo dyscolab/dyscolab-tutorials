@@ -7,7 +7,7 @@
 
 import marimo
 
-__generated_with = "0.24.0"
+__generated_with = "0.24.2"
 app = marimo.App(width="medium")
 
 async with app.setup(hide_code=True):
@@ -93,7 +93,7 @@ def _(Parameter, Simulator, System, Variable, assign, initial, steady):
     # Create a Simulator for Pitchfork
     sim = Simulator(Pitchfork)
     # Find steady state
-    steady.solve(sim, values={Pitchfork.r: 2})
+    steady.solve(sim.with_values({Pitchfork.r: 2}))
     return Pitchfork, sim
 
 

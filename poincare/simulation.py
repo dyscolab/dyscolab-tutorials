@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.24.0"
+__generated_with = "0.23.16"
 app = marimo.App(width="medium")
 
 async with app.setup(hide_code=True):
@@ -86,7 +86,11 @@ def _():
 
 @app.cell
 def _(DampedOscillator, Simulator):
-    result2 = Simulator(DampedOscillator, backend="numba").solve(save_at=range(3))
+    try:
+        result2 = Simulator(DampedOscillator, backend="numba").solve(save_at=range(3))
+    except ModuleNotFoundError:
+        print("Numba does't run on pyodide, we promise it'll work if you install it locally.")
+        result2 = Simulator(DampedOscillator).solve(save_at=range(3))
     result2
     return
 
