@@ -7,13 +7,14 @@ version = "0.1.0"
 
 [tasks]
 update-dependencies = "pixi run python set_dependencies.py"
+test-tutorials = "python test_tutorials.py"
 
 [tasks.open]
 args = [{ "arg" = "path", "default" = "" }]
 cmd = "marimo edit --no-sandbox {{path}}"
 
 [environments]
-default = ["pypi"]
+default = []
 local = ["local"]
 
 [dependencies]
@@ -27,16 +28,17 @@ seaborn = "*"
 
 [pypi-dependencies]
 rebop = "*"
-
-[feature.pypi.pypi-dependencies]
 symbolite = ">=1.1.1"
 poincare = ">=1.2.0"
 simbio = ">= 1.2.0"
 jablonski = ">= 0.4.0"
 
+[feature.local.dependencies]
+uv = "*"
+ 
+# Automatically prepends local repos to Python's module search path in the `local` env.
+[feature.local.target.unix.activation.env]
+PYTHONPATH = "${PIXI_PROJECT_ROOT}/../u2602/symbolite/src:${PIXI_PROJECT_ROOT}/../u2602/poincare/src:${PIXI_PROJECT_ROOT}/../u2602/simbio/src:${PIXI_PROJECT_ROOT}/../u2602/jablonski/src:${PYTHONPATH}"
 
-[feature.local.pypi-dependencies]
-# symbolite = { path = "../u2602/symbolite", editable = true }
-# poincare = { path = "../u2602/poincare", editable = true }
-# simbio = { path = "../u2602/simbio", editable = true }
-# jablonski = { path = "../u2602/jablonski", editable = true }
+[feature.local.target.win.activation.env]
+PYTHONPATH = "${PIXI_PROJECT_ROOT}/../u2602/symbolite/src;${PIXI_PROJECT_ROOT}/../u2602/poincare/src;${PIXI_PROJECT_ROOT}/../u2602/simbio/src;${PIXI_PROJECT_ROOT}/../u2602/jablonski/src;${PYTHONPATH}"
