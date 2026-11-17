@@ -349,7 +349,7 @@ def _(Ru_Os, Simulator, np, piecewise, pulse_excitation, u):
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    Apart from simulation Jablonski has a number of analysis tools. Instead of the population of each level we can get the spectral time resolved emission with the same pulse using `spectral_time_resolved`. We get one variable per radiative transition, named `emission_<transition>`, and the energy of each line in the attributes of the result. Emissions are photon rates (photons per unit time); since each line can come out in a different time unit we convert them all to photons per second with `.pint.to("1/s")` before plotting.
+    Apart from simulation Jablonski has a number of analysis tools. Instead of the population of each level we can get the spectral time resolved emission with the same pulse using `spectral_time_resolved`. We get one variable per radiative transition, named `emission_<transition>`, and the energy of each line in the attributes of the result. Emissions are photon rates, in photons per second.
     """)
     return
 
@@ -359,7 +359,7 @@ def _(plt, pulse_2, sim_2, spectral_time_resolved):
     spectral = spectral_time_resolved(
         sim_2, excitation=pulse_2
     )  # Time resolved emission
-    spectral.pint.to("1/s").pint.dequantify().to_dataframe().plot()
+    spectral.pint.dequantify().to_dataframe().plot()
     plt.yscale("log")
     plt.show()
     spectral.attrs  # Print dict with energy associated with each line
@@ -377,7 +377,7 @@ def _():
 @app.cell
 def _(plt, pulse_2, sim_2, time_resolved):
     total = time_resolved(sim_2, excitation=pulse_2)
-    total.pint.to("1/s").pint.dequantify().to_dataframe().plot()
+    total.pint.dequantify().to_dataframe().plot()
     plt.yscale("log")
     plt.show()
     return
@@ -449,7 +449,7 @@ def _(excitation, np, plt, sim_2, u):
     widened = widened_spectra(
         sim_2, excitation=excitation, samples=np.linspace(550, 800, 1000) * u.nm
     )
-    widened.pint.to("1/s").pint.dequantify().plot()
+    widened.pint.dequantify().plot()
     plt.ylabel("Emission [photons / s]")
     plt.show()
     lines
@@ -480,7 +480,7 @@ def _(Ru_Os, np, plt, pump_from_laser, sim_2, u, wavelength):
         excitations=excitations,
         keys=powers,
     )  # Sweep steady state emission spectra
-    df = steady.pint.to("1/s").pint.dequantify().to_dataframe().T
+    df = steady.pint.dequantify().to_dataframe().T
     df.index = df.index.map(lambda x: x.magnitude)
     df.plot()
     plt.xscale("log")

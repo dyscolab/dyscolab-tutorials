@@ -151,7 +151,7 @@ def _():
     mo.md(r"""
     Usually we are interested in the light instead. `spectral_time_resolved(sim, excitation)` gives the photon rate of every radiative transition, one variable per line named `emission_<transition>` (here `emission_fl` and `emission_ph`). The energy of each line is stored in the attributes of the result.
 
-    Results are photon rates (photons per unit time). Each line keeps the time unit of its rate, so we convert them to photons per second with `.pint.to("1/s")` before comparing them.
+    Results are photon rates, in photons per second.
     """)
     return
 
@@ -160,7 +160,7 @@ def _():
 def _(plt, pulse, timed_sim):
     from jablonski.simulation import spectral_time_resolved
 
-    lines = spectral_time_resolved(timed_sim, pulse).pint.to("1/s")
+    lines = spectral_time_resolved(timed_sim, pulse)
     lines.pint.dequantify().to_dataframe().plot()
     plt.yscale("log")
     plt.ylim(1, None)
@@ -183,7 +183,7 @@ def _(delta, np, plt, sim, u):
     from jablonski.simulation import time_resolved
 
     decay_sim = sim.with_times(save_at=np.linspace(0, 3, 200) * u.us)
-    decay = time_resolved(decay_sim, delta).pint.to("1/s")
+    decay = time_resolved(decay_sim, delta)
     decay.pint.dequantify().to_dataframe().plot()
     plt.yscale("log")
     plt.ylabel("Emission [photons / s]")
@@ -210,7 +210,7 @@ def _(cw, sim):
 
 @app.cell
 def _(cw, sim, steady_state):
-    steady_state(sim, cw)["emission"].pint.to("1/s").values
+    steady_state(sim, cw)["emission"].values
     return
 
 
@@ -246,7 +246,7 @@ def _():
 
 @app.cell
 def _(plt, pulse, time_resolved, timed_sim):
-    absorbed = time_resolved(timed_sim, pulse, kind="absorption").pint.to("1/s")
+    absorbed = time_resolved(timed_sim, pulse, kind="absorption")
     absorbed.pint.dequantify().to_dataframe().plot()
     plt.ylabel("Absorption [photons / s]")
     plt.show()
@@ -280,7 +280,7 @@ def _():
 def _(cw, sim):
     from jablonski.simulation import spectra
 
-    spectra(sim, cw).pint.to("1/s")
+    spectra(sim, cw)
     return
 
 
@@ -299,7 +299,7 @@ def _(cw, np, plt, sim, u):
     samples = np.linspace(400, 700, 1000) * u.nm
     for kind in ["fluorescence", "phosphorescence"]:
         widened = widened_spectra(sim, cw, kind=kind, samples=samples, width=10)
-        widened.pint.to("1/s").pint.dequantify().plot(label=kind)
+        widened.pint.dequantify().plot(label=kind)
     plt.yscale("log")
     plt.ylim(1e-1, 1e7)
     plt.ylabel("Emission [photons / s]")
@@ -324,7 +324,7 @@ def _(sim, u):
     from jablonski.simulation import excitation_emission_matrix, excitation_spectra
 
     flux = 1e23 / (u.cm**2 * u.s)
-    excitation_emission_matrix(sim, flux).pint.to("1/s")
+    excitation_emission_matrix(sim, flux)
     return excitation_spectra, flux
 
 
@@ -338,7 +338,7 @@ def _():
 
 @app.cell
 def _(excitation_spectra, flux, sim, u):
-    excitation_spectra(sim, emission=585 * u.nm, height=flux).pint.to("1/s")
+    excitation_spectra(sim, emission=585 * u.nm, height=flux)
     return
 
 

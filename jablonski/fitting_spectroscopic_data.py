@@ -111,7 +111,7 @@ def _(Ruthenium, np, pulse_excitation, sim, spectral_time_resolved, u):
     exact = spectral_time_resolved(sim.with_times(save_at=save_at), excitation=pulse)
     # The result also has the times of the excitation events, keep only save_at
     exact = exact.pint.sel(time=save_at, method="nearest")
-    phosphorescence = exact["emission_ph"].pint.to("1/s").pint.dequantify().values
+    phosphorescence = exact["emission_ph"].pint.dequantify().values
 
     rng = np.random.default_rng(seed=1)
     measured = phosphorescence * (1 + 0.03 * rng.standard_normal(phosphorescence.shape))
@@ -209,7 +209,7 @@ def _(
         excitation=pulse,
         save_at=np.linspace(0, 3, 300) * u.us,
     )
-    fitted_ph = fitted["emission_ph"].pint.to({"time": u.us}).pint.to("1/s")
+    fitted_ph = fitted["emission_ph"].pint.to({"time": u.us})
 
     plt.errorbar(
         save_at.magnitude,
@@ -239,7 +239,7 @@ def _():
 def _(Ruthenium, rng, sim, spectra, u):
     cw_excitation = {Ruthenium.abs: 1e20 / (u.cm**2 * u.s)}
     exact_spectrum = spectra(sim, excitation=cw_excitation).pint.dequantify()
-    wavelengths = exact_spectrum[exact_spectrum.dims[0]].values
+    wavelengths = exact_spectrum.wavelength.values
     measured_spectrum = exact_spectrum.values * (
         1 + 0.03 * rng.standard_normal(exact_spectrum.shape)
     )

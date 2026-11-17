@@ -66,7 +66,7 @@ def _():
 
     def plot_emission(ds, variable="emission", **kwargs):
         """Plot a time resolved result in photons / s against time in ns."""
-        da = ds[variable].pint.to({"time": u.ns}).pint.to("1/s").pint.dequantify()
+        da = ds[variable].pint.to({"time": u.ns}).pint.dequantify()
         plt.plot(da.time.values, da.values, **kwargs)
         plt.xlabel("time [ns]")
         plt.ylabel("emission [photons / s]")
