@@ -17,9 +17,10 @@ dependencies = [
 files = [
     "poincare/asymptotic_behaviour.py",
     "poincare/composing.py",
-    "poincare/getting_started_with_poincare.py",
+    "poincare/fitting.py",
     "poincare/getting_started_with_poincare.py",
     "poincare/simulation.py",
+    "poincare/units.py",
     "examples/excitabilty.py",
 ]
 
@@ -33,6 +34,7 @@ dependencies = [
 files = [
     "simbio/getting_started_with_simbio.py",
     "simbio/repressilator.py",
+    "simbio/sbml.py",
     "simbio/using_volume.py",
 ]
 
@@ -53,4 +55,18 @@ dependencies = [
     "jablonski>=0.4.0",
     "matplotlib",
 ]
-files = ["jablonski/getting_started_with_jablonski.py"]
+files = [
+    "jablonski/fitting_spectroscopic_data.py",
+    "jablonski/getting_started_with_jablonski.py",
+    "jablonski/spectroscopic_simulations.py",
+]
+
+[jablonski-rebop]
+dependencies = [
+    "pint_pandas<=0.7",
+    "typing_extensions>=4.15.0",
+    "jablonski>=0.4.0",
+    "matplotlib",
+    "rebop",
+]
+files = ["jablonski/stochastic_photon_counting.py"]

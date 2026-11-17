@@ -69,7 +69,7 @@ def _():
     from simbio import System, RateLaw, Variable, initial
 
     class Model(System):
-        # Create species A, B, and C, each with intial value 1
+        # Create species A, B, and C, each with initial value 1
         A: Variable = initial(default=1)
         B: Variable = initial(default=1)
         C: Variable = initial(default=1)
@@ -97,7 +97,7 @@ def _():
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    To simulate it we must create a `Simulator` for it
+    To simulate it we must create a `Simulator` for it. We will simulate this model more than once, so we store the times at which the solution is saved on the simulator with `with_times()`. Every call to `solve()` then uses them. For a model simulated only once, the times can be passed directly as `solve(save_at=...)`, as we do in the next section. The difference between `save_at` and `t_span` is explained in [Simulation](https://dyscolab.github.io/static_notebooks/simulation.html).
     """)
     return
 
@@ -107,8 +107,8 @@ def _(Model):
     import numpy as np
     from simbio import Simulator
 
-    sim = Simulator(Model)
-    result = sim.solve(save_at=np.linspace(0, 10, 100))
+    sim = Simulator(Model).with_times(save_at=np.linspace(0, 10, 100))
+    result = sim.solve()
     result
     return Simulator, np, result, sim
 
@@ -130,14 +130,14 @@ def _(result):
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    We can vary initial conditions by calling `with_values()` on the solve and passing it a dictionary with inital conditions.
+    We can vary initial conditions by calling `with_values()` on the simulator and passing it a dictionary with initial conditions. It returns a new simulator, which keeps the times we stored:
     """)
     return
 
 
 @app.cell
 def _(Model, sim):
-    sim.with_values({Model.A: 2, Model.B: 0.5}).solve(save_at=range(3)).to_dataframe().plot()
+    sim.with_values({Model.A: 2, Model.B: 0.5}).solve().to_dataframe().plot()
     return
 
 
@@ -155,14 +155,14 @@ def _(System, Variable, initial):
     from simbio import MassAction
 
     class ModelMA(System):
-        # Create species A, B, and C, each with intial value 1
+        # Create species A, B, and C, each with initial value 1
         A: Variable = initial(default=1)
         B: Variable = initial(default=1)
         C: Variable = initial(default=1)
 
         reaction = MassAction(reactants=[2 * A, B], products=[C], rate=1)
 
-    return (ModelMA,)
+    return MassAction, ModelMA
 
 
 @app.cell(hide_code=True)
@@ -204,7 +204,7 @@ def _():
     mo.md(r"""
     ### Constants
 
-    Constants allow to define common initial conditions for Variables:
+    Constants allow to define common initial conditions for Variables. Since we will simulate this model with different values, we store the times on the simulator:
     """)
     return
 
@@ -214,18 +214,19 @@ def _(RateLaw, Simulator, System, Variable, initial):
     from simbio import Constant, assign
 
     class ModelConst(System):
-        # Create a constant c to set intial conditions for A and B
+        # Create a constant c to set initial conditions for A and B
         c: Constant = assign(default=1, constant=True)
 
-        # Create species A, B, and C, each with intial value 1
+        # Create species A, B, and C, each with initial value 1
         A: Variable = initial(default=c)
         B: Variable = initial(default=2 * c)
         C: Variable = initial(default=1)
 
         reaction = RateLaw(reactants=[2 * A, B], products=[C], rate_law=1)
 
-    Simulator(ModelConst).solve(save_at=range(3))
-    return ModelConst, assign
+    sim_const = Simulator(ModelConst).with_times(save_at=range(3))
+    sim_const.solve()
+    return ModelConst, assign, sim_const
 
 
 @app.cell(hide_code=True)
@@ -237,22 +238,22 @@ def _():
 
 
 @app.cell
-def _(ModelConst, Simulator):
-    Simulator(ModelConst).with_values({ModelConst.c: 2}).solve(save_at=range(3))
+def _(ModelConst, sim_const):
+    sim_const.with_values({ModelConst.c: 2}).solve()
     return
 
 
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    But we can break that connection by passing `y`'s initial value directly:
+    But we can break that connection by passing `A`'s initial value directly:
     """)
     return
 
 
 @app.cell
-def _(ModelConst, Simulator):
-    Simulator(ModelConst).with_values({ModelConst.c: 2}).solve(save_at=range(3))
+def _(ModelConst, sim_const):
+    sim_const.with_values({ModelConst.c: 2, ModelConst.A: 1}).solve()
     return
 
 
@@ -269,7 +270,7 @@ def _():
     mo.md(r"""
     Parameters are like Variables,
     but their time evolution is given directly as a function of time,
-    Variables, Constants and other Parameters. Their default value can also be changed in `values`:
+    Variables, Constants and other Parameters. Their default value can also be changed with `with_values()`:
     """)
     return
 
@@ -279,7 +280,7 @@ def _(RateLaw, Simulator, System, Variable, assign, initial):
     from simbio import Parameter
 
     class ModelParametrized(System):
-        # Create species A, B, and C, each with intial value 1
+        # Create species A, B, and C, each with initial value 1
         A: Variable = initial(default=1)
         B: Variable = initial(default=1)
         C: Variable = initial(default=1)
@@ -292,6 +293,91 @@ def _(RateLaw, Simulator, System, Variable, assign, initial):
     Simulator(ModelParametrized).with_values({ModelParametrized.rate: 3}).solve(
         save_at=range(3)
     )
+    return (Parameter,)
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""
+    ### Parameters as constant species
+
+    Sometimes the amount of a reactant does not change during the simulation, for example a substrate that is buffered or supplied in large excess. We can use a `Parameter` as a reactant: it enters the `MassAction` rate law like any other reactant, but it has no equation of its own.
+    """)
+    return
+
+
+@app.cell
+def _(MassAction, Parameter, Simulator, System, Variable, assign, initial, np):
+    class Buffered(System):
+        # S is buffered: its value stays constant
+        S: Parameter = assign(default=10)
+        P: Variable = initial(default=0)
+        k: Parameter = assign(default=0.1)
+
+        conversion = MassAction(reactants=[S], products=[P], rate=k)
+
+    sim_buffered = Simulator(Buffered).with_times(save_at=np.linspace(0, 10, 100))
+    sim_buffered.solve().to_dataframe().plot()
+    return Buffered, sim_buffered
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""
+    The model has a single equation,
+    $$
+    \frac{dP}{dt} = k S,
+    $$
+    so `P` grows linearly while `S` stays at its value. Since `S` is a parameter, we can change it with `with_values()`, here doubling the production rate:
+    """)
+    return
+
+
+@app.cell
+def _(Buffered, sim_buffered):
+    sim_buffered.with_values({Buffered.S: 20}).solve().to_dataframe().plot()
+    return
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""
+    ## Model reports
+
+    `notebook_report()` displays a report of a model in a notebook (marimo or Jupyter): its reactions, the equations they produce, and tables with the variables and parameters. `level` sets the heading level of each section.
+    """)
+    return
+
+
+@app.cell
+def _(ModelMA):
+    from simbio import notebook_report
+
+    notebook_report(ModelMA, level=3)
+    return
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""
+    To show only the reactions, use `latex_reactions()`. With `format="markdown"` it returns display math that can be rendered with `mo.md()`; the default `format="latex"` is meant for LaTeX documents.
+    """)
+    return
+
+
+@app.cell
+def _(Buffered):
+    from simbio.latex import latex_reactions
+
+    mo.md(latex_reactions(Buffered, format="markdown"))
+    return
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""
+    `notebook_report()` takes the same options as poincare's reports (`transform`, `descriptions`, `replace_algebraics` and `sections`), and `model_report()` writes the report as a LaTeX document. See [Model reports](https://dyscolab.github.io/static_notebooks/getting_started_with_poincare.html#model-reports) in poincare's getting started for how to use them.
+    """)
     return
 
 

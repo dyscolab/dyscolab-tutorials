@@ -76,7 +76,7 @@ def _():
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    ## Creating and simultaing a system
+    ## Creating and simulating a system
     Systems are represented as a subclass of the `System` Class. To create one with equations:
     $$ \frac{dx}{dt} = -x \quad \text{with} \quad x(0) = 1 $$
     we can write:
@@ -300,6 +300,8 @@ def _(ModelXY, Simulator):
     return
 
 
+
+
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
@@ -329,8 +331,79 @@ def _(Simulator, System, Variable, assign, initial):
 
     # We can use a value other than the default for parameter `p` when solving the system
     Simulator(ParametrizedDecay).with_values({ParametrizedDecay.p: 0.5}).solve(save_at=range(3))
-    Simulator(ParametrizedDecay).with_values({ParametrizedDecay.p: 2}).solve(save_at=range(3))
     return Parameter, ParametrizedDecay
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""
+    A parameter can also be declared without a default by calling `assign()` without arguments. The `Simulator` can still be created, but a value must be given with `with_values()` before solving:
+    """)
+    return
+
+
+@app.cell
+def _(Parameter, Simulator, System, Variable, assign, initial):
+    class UnknownDecay(System):
+        # `k` has no default value
+        k: Parameter = assign()
+        x: Variable = initial(default=1)
+        eq = x.derive() << -k * x
+
+    unknown_sim = Simulator(UnknownDecay)
+    try:
+        unknown_sim.solve(save_at=range(3))
+    except TypeError as te:
+        # Poincare raises a TypeError when solving with missing values
+        print("TypeError:", te)
+    return UnknownDecay, unknown_sim
+
+
+@app.cell
+def _(UnknownDecay, unknown_sim):
+    unknown_sim.with_values({UnknownDecay.k: 2}).solve(save_at=range(3))
+    return
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""
+    ## Simulation times
+
+    So far we have passed the times to `solve()` every time. When the same model is simulated more than once, for example to compare different parameter values, we can store the times on the simulator with `with_times()`. Like `with_values()`, it returns a new `Simulator`, and `solve()` can then be called without times:
+    """)
+    return
+
+
+@app.cell
+def _(ParametrizedDecay, Simulator, np):
+    import matplotlib.pyplot as plt
+
+    # Store the times on the simulator
+    decay_sim = Simulator(ParametrizedDecay).with_times(save_at=np.linspace(0, 5, 50))
+
+    _fig, _ax = plt.subplots()
+    for _p in [0.5, 1, 2]:
+        # Only the values change, the times are taken from the simulator
+        _result = decay_sim.with_values({ParametrizedDecay.p: _p}).solve()
+        _ax.plot(_result["time"], _result["x"], label=f"p = {_p}")
+    _ax.set(xlabel="time", ylabel="x")
+    _ax.legend()
+    _ax
+    return
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""
+    As a rule of thumb:
+
+    - if a model is simulated once, pass `save_at` to `solve()`;
+    - if the same model is simulated more than once (comparing values, sweeps, fits), store the times with `with_times()` and call `solve()` without them.
+
+    Besides `save_at`, `with_times()` and `solve()` also accept `t_span`, the interval over which the system is integrated. See [Simulation in poincare](https://dyscolab.github.io/static_notebooks/simulation.html) for the difference between the two.
+    """)
+    return
 
 
 @app.cell(hide_code=True)
@@ -352,22 +425,23 @@ def _(Parameter, Simulator, System, Variable, assign, initial):
 
         eq = x.derive() << Force
 
-    Simulator(ParametrizedForce).solve(save_at=range(3))
-    return ParametrizedForce, real
+    force_sim = Simulator(ParametrizedForce).with_times(save_at=range(3))
+    force_sim.solve()
+    return ParametrizedForce, force_sim, real
 
 
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    Note how `F` is a function of `x`. Parameters which depend on variables cannot be changed after model compilation:
+    Note how `Force` is a function of `x`. Parameters which depend on variables cannot be changed after model compilation:
     """)
     return
 
 
 @app.cell
-def _(ParametrizedForce, Simulator, real):
+def _(ParametrizedForce, force_sim, real):
     try:
-        Simulator(ParametrizedForce).with_values({ParametrizedForce.Force: real.cos(ParametrizedForce.x)}).solve(save_at=range(3))
+        force_sim.with_values({ParametrizedForce.Force: real.cos(ParametrizedForce.x)}).solve()
     except ValueError as ve:
         # Poincare Raises a ValueError when the functional dependece of a parameter is changed
         print("ValueError:", ve)
@@ -394,40 +468,99 @@ def _(ParametrizedForce, Simulator, real):
 def _():
     mo.md(r"""
     ## Model Reports
-    Aside for its use in simulation, Poincare is meant to be a centralized for source for all information concerning the system. To ensure consistency between analytical formulations and numerical implementations, we can use the `model_report()` function to generate LaTeX code for a report with all relevant model data (equations, variables and parameters):
+    Aside for its use in simulation, Poincare is meant to be a centralized source for all information concerning the system. To ensure consistency between analytical formulations and numerical implementations, we can generate a report with all relevant model data (equations, variables and parameters).
+
+    In a notebook, `notebook_report()` displays the report directly:
     """)
     return
 
 
 @app.cell
-def _(ParametrizedForce):
+def _(ParametrizedDecay):
+    from poincare.printing import notebook_report
+
+    notebook_report(ParametrizedDecay)
+    return (notebook_report,)
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""
+    Some arguments control how the report is generated:
+
+    - `transform`: a dictionary `{component: latex expression}` to replace the name of certain components. E.g.: `transform={ParametrizedDecay.p: "k"}` writes "k" instead of "p" in the report.
+    - `descriptions`: a dictionary `{component: description}` that adds a column with a description of each variable and parameter.
+    """)
+    return
+
+
+@app.cell
+def _(ParametrizedDecay, notebook_report):
+    notebook_report(
+        ParametrizedDecay,
+        transform={ParametrizedDecay.p: "k"},
+        descriptions={
+            ParametrizedDecay.x: "amount",
+            ParametrizedDecay.p: "decay rate",
+        },
+    )
+    return
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""
+    - `replace_algebraics`: whether to replace parameters that depend on other parameters and variables by their expressions. It is `False` by default, so "Force" appears in the equations and is defined in the parameter table:
+    """)
+    return
+
+
+@app.cell
+def _(ParametrizedForce, notebook_report):
+    notebook_report(ParametrizedForce)
+    return
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""
+    Passing `replace_algebraics=True` writes its expression into the equations instead:
+    """)
+    return
+
+
+@app.cell
+def _(ParametrizedForce, notebook_report):
+    notebook_report(ParametrizedForce, replace_algebraics=True)
+    return
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""
+    To include the model in a paper or thesis, `model_report()` generates the same report as LaTeX code and writes it to a file. It takes the same `transform`, `descriptions` and `replace_algebraics` arguments:
+    """)
+    return
+
+
+@app.cell
+def _(ParametrizedDecay):
     from poincare import model_report
 
-    print(model_report(ParametrizedForce))
-    return (model_report,)
-
-
-@app.cell(hide_code=True)
-def _():
-    mo.md(r"""
-    instead of printing the output a file path can be passed for `model_report()` to write on:
-    """)
-    return
-
-
-@app.cell
-def _(ParametrizedDecay, model_report):
-    model_report(ParametrizedDecay, path="Parametrized_Decay_report.tex")
+    model_report(
+        ParametrizedDecay,
+        path="Parametrized_Decay_report.tex",
+        transform={ParametrizedDecay.p: "k"},
+    )
     return
 
 
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    There are also three additional arguments to control how the report is generated:
-    - `standalone`: decides wether it should compile as a standalone document (by including headers such as "\documentclass", "\begin{document}") or is meant to be added to a an existing document; when a path is passed it also controls if it overwrites existing contents (if `True`) or it appends (if `False`). It is `True` by default.
-    - `transform`: a dictionary {component: latex expression} to replace the name of certain components. E.g.: ``` transform = {ParametrizedForce.Force: "F"}``` replaces "Force" for "F" in the report.
-    - `replace_algebraics`: whether to replace parameters that depend on other parameters and variables for their expressions in dependence or leave them es is, is is `False` by default. E.g.: passing `replace_algebracis = True` replaces "Force" with "sin(t)" in the report.
+    The `standalone` argument decides whether the file compiles as a standalone document (by including headers such as `\documentclass` and `\begin{document}`) or is meant to be added to an existing document. It also controls whether existing contents of the file are overwritten (if `True`) or appended to (if `False`). It is `True` by default.
+
+    If no `path` is given, `model_report()` returns the LaTeX code as a string instead.
     """)
     return
 
@@ -437,9 +570,10 @@ def _():
     mo.md(r"""
     ## Units
 
-    poincaré also supports functions through
+    poincaré also supports units through
     [`pint`](https://github.com/hgrecco/pint)
     and [`pint-pandas`](https://github.com/hgrecco/pint-pandas).
+    Variables, parameters and simulation times can be given with units:
     """)
     return
 
@@ -456,48 +590,14 @@ def _(Derivative, Parameter, Simulator, System, Variable, assign, initial, np):
         w: Parameter = assign(default=1 * unit.Hz)
         eq = v.derive() << -(w**2) * x
 
-    result_3 = Simulator(UnitModel).solve(save_at=np.array(range(3)) * unit.s)
-    return (result_3,)
-
-
-@app.cell(hide_code=True)
-def _():
-    mo.md(r"""
-    The columns have units of `m` and `m/s`, respectively.
-    `pint` raises a `DimensionalityError` if we try to add them:
-    """)
-    return
-
-
-@app.cell
-def _(result_3):
-    from pint import DimensionalityError
-
-    try:
-        result_3["x"] + result_3["v"]
-    except DimensionalityError as de:
-        print("DimensionalityError: ", de)
+    Simulator(UnitModel).solve(save_at=np.linspace(0, 2, 3) * unit.s)
     return
 
 
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    We can remove the units with:
-    """)
-    return
-
-
-@app.cell
-def _(result_3):
-    result_3.pint.dequantify()
-    return
-
-
-@app.cell(hide_code=True)
-def _():
-    mo.md(r"""
-    which allows to plot the DataFrame with `.plot()`.
+    The columns of the result have units of `m` and `m/s`, respectively. See [Units in poincare](https://dyscolab.github.io/static_notebooks/units.html) for more on working with units.
     """)
     return
 
