@@ -8,7 +8,7 @@
 
 import marimo
 
-__generated_with = "0.24.0"
+__generated_with = "0.23.16"
 app = marimo.App(width="medium")
 
 async with app.setup(hide_code=True):
@@ -300,8 +300,6 @@ def _(ModelXY, Simulator):
     return
 
 
-
-
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
@@ -370,7 +368,7 @@ def _():
     mo.md(r"""
     ## Simulation times
 
-    So far we have passed the times to `solve()` every time. When the same model is simulated more than once, for example to compare different parameter values, we can store the times on the simulator with `with_times()`. Like `with_values()`, it returns a new `Simulator`, and `solve()` can then be called without times:
+    So far we have passed the times to `solve()` every time. When the same model is simulated more than once we can store the times on the simulator with `with_times()`. Like `with_values()`, it returns a new `Simulator`, and `solve()` can then be called without times:
     """)
     return
 
@@ -396,11 +394,6 @@ def _(ParametrizedDecay, Simulator, np):
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    As a rule of thumb:
-
-    - if a model is simulated once, pass `save_at` to `solve()`;
-    - if the same model is simulated more than once (comparing values, sweeps, fits), store the times with `with_times()` and call `solve()` without them.
-
     Besides `save_at`, `with_times()` and `solve()` also accept `t_span`, the interval over which the system is integrated. See [Simulation in poincare](https://dyscolab.github.io/static_notebooks/simulation.html) for the difference between the two.
     """)
     return
@@ -461,6 +454,43 @@ def _(ParametrizedForce, Simulator, real):
     # create a new simulator with the new formula for Force
     new_sim = Simulator(ParametrizedForce(Force=real.cos(ParametrizedForce.x)))
     new_sim.solve(save_at=range(3))
+    return
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""
+    ## Units
+
+    poincaré also supports units through
+    [`pint`](https://github.com/hgrecco/pint)
+    and [`pint-pandas`](https://github.com/hgrecco/pint-pandas).
+    Variables, parameters and simulation times can be given with units:
+    """)
+    return
+
+
+@app.cell
+def _(Derivative, Parameter, Simulator, System, Variable, assign, initial, np):
+    import pint
+
+    unit = pint.UnitRegistry()
+
+    class UnitModel(System):
+        x: Variable = initial(default=1 * unit.m)
+        v: Derivative = x.derive(initial=0 * unit.m / unit.s)
+        w: Parameter = assign(default=1 * unit.Hz)
+        eq = v.derive() << -(w**2) * x
+
+    Simulator(UnitModel).solve(save_at=np.linspace(0, 2, 3) * unit.s)
+    return
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""
+    The columns of the result have units of `m` and `m/s`, respectively. See [Units in poincare](https://dyscolab.github.io/static_notebooks/units.html) for more on working with units.
+    """)
     return
 
 
@@ -538,7 +568,7 @@ def _(ParametrizedForce, notebook_report):
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    To include the model in a paper or thesis, `model_report()` generates the same report as LaTeX code and writes it to a file. It takes the same `transform`, `descriptions` and `replace_algebraics` arguments:
+    To include the model in an external document, `model_report()` generates the same report as LaTeX code and writes it to a file. It takes the same `transform`, `descriptions` and `replace_algebraics` arguments:
     """)
     return
 
@@ -561,43 +591,6 @@ def _():
     The `standalone` argument decides whether the file compiles as a standalone document (by including headers such as `\documentclass` and `\begin{document}`) or is meant to be added to an existing document. It also controls whether existing contents of the file are overwritten (if `True`) or appended to (if `False`). It is `True` by default.
 
     If no `path` is given, `model_report()` returns the LaTeX code as a string instead.
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _():
-    mo.md(r"""
-    ## Units
-
-    poincaré also supports units through
-    [`pint`](https://github.com/hgrecco/pint)
-    and [`pint-pandas`](https://github.com/hgrecco/pint-pandas).
-    Variables, parameters and simulation times can be given with units:
-    """)
-    return
-
-
-@app.cell
-def _(Derivative, Parameter, Simulator, System, Variable, assign, initial, np):
-    import pint
-
-    unit = pint.UnitRegistry()
-
-    class UnitModel(System):
-        x: Variable = initial(default=1 * unit.m)
-        v: Derivative = x.derive(initial=0 * unit.m / unit.s)
-        w: Parameter = assign(default=1 * unit.Hz)
-        eq = v.derive() << -(w**2) * x
-
-    Simulator(UnitModel).solve(save_at=np.linspace(0, 2, 3) * unit.s)
-    return
-
-
-@app.cell(hide_code=True)
-def _():
-    mo.md(r"""
-    The columns of the result have units of `m` and `m/s`, respectively. See [Units in poincare](https://dyscolab.github.io/static_notebooks/units.html) for more on working with units.
     """)
     return
 

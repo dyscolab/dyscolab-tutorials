@@ -28,7 +28,9 @@ def _():
     ```bash
     pip install rebop
     ```
-    This is the same approach as SimBio's [stochastic simulations](https://dyscolab.github.io/static_notebooks/stochastic.html), applied to spectroscopic models. We'll use a dye with 20 molecules, a fluorescent singlet and a phosphorescent triplet:
+    This is the same approach as SimBio's [stochastic simulations](https://dyscolab.github.io/static_notebooks/stochastic.html), applied to spectroscopic models.
+
+    As an example we'll look at a single dye molecule under constant laser illumination, as in a single molecule fluorescence microscope. A typical dye, like a rhodamine, is excited from $S_0$ to $S_1$ and emits fluorescence within a few ns. Once every few thousand excitations it crosses to the triplet $T_1$ instead, where it stays for microseconds. While it is in the triplet the molecule can't absorb or fluoresce, so its fluorescence switches on and off: it *blinks*. An average over many molecules hides this, but a single molecule shows it clearly.
     """)
     return
 
@@ -40,7 +42,7 @@ def _():
     import pint
 
     from jablonski import Simulator, SingletState, SpectroscopicSystem, TripletState, initial
-    from jablonski.simulation import pulse_excitation, time_resolved
+    from jablonski.simulation import step_excitation, time_resolved
     from jablonski.transitions import (
         Absorption,
         Fluorescence,
@@ -49,29 +51,25 @@ def _():
         Phosphorescence,
         ReverseIntersystemCrossing,
     )
+    from jablonski.plots import jablonski_diagram
 
     u = pint.get_application_registry()
 
-    class Dye(SpectroscopicSystem):
-        S0: SingletState = initial(0 * u.eV, "singlet", default=20)
+    class Rhodamine(SpectroscopicSystem):
+        S0: SingletState = initial(0 * u.eV, "singlet", default=1)
         T1: TripletState = initial(1.8 * u.eV, "triplet", default=0)
-        S1: SingletState = initial(2.5 * u.eV, "singlet", default=0)
+        S1: SingletState = initial(2.3 * u.eV, "singlet", default=0)
 
-        abs = Absorption(ground=S0, excited=S1, rate=1e-16 * u.cm**2)
-        fl = Fluorescence(excited=S1, ground=S0, rate=0.5 / (10 * u.ns))
-        ic = InternalConversion(high=S1, low=S0, rate=0.2 / (10 * u.ns))
-        isc = IntersystemCrossing(source=S1, target=T1, rate=0.3 / (10 * u.ns))
-        ph = Phosphorescence(excited=T1, ground=S0, rate=0.2 / (100 * u.ns))
-        risc = ReverseIntersystemCrossing(source=T1, target=S0, rate=0.8 / (100 * u.ns))
+        abs = Absorption(ground=S0, excited=S1, rate=4e-16 * u.cm**2)
+        fl = Fluorescence(excited=S1, ground=S0, rate=2.4e8 / u.s)
+        ic = InternalConversion(high=S1, low=S0, rate=1e7 / u.s)
+        isc = IntersystemCrossing(source=S1, target=T1, rate=2e5 / u.s)
+        ph = Phosphorescence(excited=T1, ground=S0, rate=1e3 / u.s)
+        # T1 -> S0 is also a crossing from a triplet to a singlet, here without emission
+        triplet_decay = ReverseIntersystemCrossing(source=T1, target=S0, rate=1e5 / u.s)
 
-    def plot_emission(ds, variable="emission", **kwargs):
-        """Plot a time resolved result in photons / s against time in ns."""
-        da = ds[variable].pint.to({"time": u.ns}).pint.dequantify()
-        plt.plot(da.time.values, da.values, **kwargs)
-        plt.xlabel("time [ns]")
-        plt.ylabel("emission [photons / s]")
-
-    return Dye, Simulator, np, plot_emission, plt, pulse_excitation, time_resolved, u
+    jablonski_diagram(Rhodamine)
+    return Rhodamine, Simulator, np, plt, step_excitation, time_resolved, u
 
 
 @app.cell(hide_code=True)
@@ -80,27 +78,26 @@ def _():
     ## A single run
     Instead of a `Simulator` we create a `RebopSimulator`, and use the `rebop_*` functions from `jablonski.rebop`. They take the same excitations as their ODE counterparts, but like `RebopSimulator.solve` they use the simulation end time `upto_t` and the number of points `n_points` instead of `save_at`. Since we'll run many simulations over the same times, we set them once on the simulator with `with_times(upto_t=..., n_points=...)`, as with `save_at` for the ODE `Simulator` (see [Simulation](https://dyscolab.github.io/static_notebooks/simulation.html)). They can also be passed to each function, and an argument given there overrides the one on the simulator. The time of the result is in the unit of `upto_t`.
 
-    Here we excite the dye with a 5 ns pulse and follow the total emission for 500 ns with `rebop_time_resolved`:
+    Here we switch the laser on at $t = 0$ with `step_excitation`, which keeps it on until the end of the simulation, and follow the total emission for 200 μs with `rebop_time_resolved`:
     """)
     return
 
 
 @app.cell
-def _(Dye, pulse_excitation, u):
+def _(Rhodamine, step_excitation, u):
     from jablonski.rebop import (
         RebopSimulator,
         rebop_spectral_time_resolved,
         rebop_time_resolved,
     )
 
-    rsim = RebopSimulator(Dye).with_times(upto_t=500 * u.ns, n_points=500)
-    pulse = pulse_excitation({Dye.abs: 1e24 / (u.cm**2 * u.s)}, width=5 * u.ns)
+    rsim = RebopSimulator(Rhodamine).with_times(upto_t=200 * u.us, n_points=20000)
+    laser = step_excitation({Rhodamine.abs: 1e23 / (u.cm**2 * u.s)})
 
-    single_run = rebop_time_resolved(rsim, excitation=pulse)
+    single_run = rebop_time_resolved(rsim, excitation=laser)
     single_run
     return (
-        RebopSimulator,
-        pulse,
+        laser,
         rebop_spectral_time_resolved,
         rebop_time_resolved,
         rsim,
@@ -111,20 +108,24 @@ def _(Dye, pulse_excitation, u):
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    The emission at each time is the photon rate given the molecules that are excited in this run: the radiative rate times the number of excited molecules. Every time a molecule is excited or decays it jumps by one molecule's rate, while the ODE result from `time_resolved` changes smoothly:
+    The emission at each time is the photon rate given the molecules that are excited at that instant: the radiative rate times the number of excited molecules. For a single molecule it jumps between 0 and the fluorescence rate every few ns. A detector instead counts the photons that arrive in a time bin, so to compare with a measurement we average the emission over bins of 100 points (1 μs) with xarray's `coarsen`.
+
+    The binned single molecule trace has bright periods interrupted by dark ones, when the molecule is in the triplet. The ODE result from `time_resolved` is the average over many molecules: it starts at its highest value, when all molecules are in the singlets, and drops within a few μs as a fraction of them gets stuck in the triplet.
     """)
     return
 
 
 @app.cell
-def _(Dye, Simulator, np, plot_emission, plt, pulse, single_run, time_resolved, u):
+def _(Rhodamine, Simulator, laser, np, plt, single_run, time_resolved, u):
     deterministic = time_resolved(
-        Simulator(Dye), excitation=pulse, save_at=np.linspace(0, 500, 501) * u.ns
+        Simulator(Rhodamine), excitation=laser, save_at=np.linspace(0, 200, 401) * u.us
     )
+    deterministic = deterministic["emission"].pint.to({"time": u.us}).pint.dequantify()
 
-    plot_emission(single_run, label="stochastic, single run")
-    plot_emission(deterministic, label="deterministic")
-    plt.legend()
+    binned = single_run["emission"].pint.dequantify().coarsen(time=100, boundary="trim").mean()
+    plt.plot(binned.time, binned, label="single molecule, 1 μs bins")
+    plt.plot(deterministic.time, deterministic, label="deterministic", color="black")
+    plt.xlabel("time [μs]"); plt.ylabel("emission [photons / s]"); plt.legend()
     plt.show()
     return (deterministic,)
 
@@ -139,9 +140,9 @@ def _():
 
 
 @app.cell
-def _(pulse, rebop_time_resolved, rsim):
-    run_a = rebop_time_resolved(rsim, excitation=pulse, rng=42)
-    run_b = rebop_time_resolved(rsim, excitation=pulse, rng=42)
+def _(laser, rebop_time_resolved, rsim):
+    run_a = rebop_time_resolved(rsim, excitation=laser, rng=42)
+    run_b = rebop_time_resolved(rsim, excitation=laser, rng=42)
     run_a.pint.dequantify().identical(run_b.pint.dequantify())
     return
 
@@ -149,15 +150,18 @@ def _(pulse, rebop_time_resolved, rsim):
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    Different seeds give different runs. Plotting a few of them shows how much a measurement on 20 molecules can vary:
+    Different seeds give different runs. Plotting a few of them, each shifted up by $5 \cdot 10^7$ photons / s so that they don't overlap, shows that the dark periods start at random times and have random lengths:
     """)
     return
 
 
 @app.cell
-def _(plot_emission, plt, pulse, rebop_time_resolved, rsim):
-    for seed in range(5):
-        plot_emission(rebop_time_resolved(rsim, excitation=pulse, rng=seed), alpha=0.6)
+def _(laser, plt, rebop_time_resolved, rsim):
+    for seed in range(3):
+        trace = rebop_time_resolved(rsim, excitation=laser, rng=seed)
+        trace = trace["emission"].pint.dequantify().coarsen(time=100, boundary="trim").mean()
+        plt.plot(trace.time, trace + seed * 5e7)
+    plt.xlabel("time [μs]"); plt.ylabel("emission + offset [photons / s]")
     plt.show()
     return
 
@@ -166,18 +170,19 @@ def _(plot_emission, plt, pulse, rebop_time_resolved, rsim):
 def _():
     mo.md(r"""
     ## Averaging runs
-    Measurements are often repeated and averaged, for example with time-correlated single photon counting. `n_runs` runs the simulation several times, each with its own random numbers, and returns the average. As the number of runs grows, the average approaches the deterministic result:
+    Measurements are often repeated and averaged, or made on many molecules at once. `n_runs` runs the simulation several times, each with its own random numbers, and returns the average. As the number of runs grows, the average approaches the deterministic result:
     """)
     return
 
 
 @app.cell
-def _(deterministic, plot_emission, plt, pulse, rebop_time_resolved, rsim):
+def _(deterministic, laser, plt, rebop_time_resolved, rsim):
     for n_runs in [10, 200]:
-        averaged = rebop_time_resolved(rsim, excitation=pulse, rng=1, n_runs=n_runs)
-        plot_emission(averaged, label=f"average of {n_runs} runs", alpha=0.8)
-    plot_emission(deterministic, label="deterministic", color="black")
-    plt.legend()
+        averaged = rebop_time_resolved(rsim, excitation=laser, rng=1, n_runs=n_runs)
+        averaged = averaged["emission"].pint.dequantify().coarsen(time=100, boundary="trim").mean()
+        plt.plot(averaged.time, averaged, label=f"average of {n_runs} runs", alpha=0.8)
+    plt.plot(deterministic.time, deterministic, label="deterministic", color="black")
+    plt.xlabel("time [μs]"); plt.ylabel("emission [photons / s]"); plt.legend()
     plt.show()
     return
 
@@ -188,20 +193,20 @@ def _():
     With a seed, the averaged result is also reproducible.
 
     ## Emission lines
-    `rebop_spectral_time_resolved` gives each emission line separately, like `spectral_time_resolved`, with the energy of each line in `attrs`. Here we also pass `n_points=100`, which overrides the 500 points set on the simulator while keeping its `upto_t`. The fast fluorescence (2.5 eV) is only seen during and right after the pulse, while the phosphorescence (1.8 eV) lasts much longer:
+    `rebop_spectral_time_resolved` gives each emission line separately, like `spectral_time_resolved`, with the energy of each line in `attrs`. Here we also pass `n_points=100`, which overrides the 20000 points set on the simulator while keeping its `upto_t`.
     """)
     return
 
 
 @app.cell
-def _(plot_emission, plt, pulse, rebop_spectral_time_resolved, rsim):
+def _(laser, plt, rebop_spectral_time_resolved, rsim):
     lines = rebop_spectral_time_resolved(
-        rsim, excitation=pulse, n_points=100, rng=1, n_runs=50
+        rsim, excitation=laser, n_points=100, rng=1, n_runs=50
     )
     for line in lines.data_vars:
-        plot_emission(lines, variable=line, label=f"{line} ({lines.attrs[line]})")
-    plt.yscale("log")
-    plt.legend()
+        emission = lines[line].pint.dequantify()
+        plt.plot(emission.time, emission, label=f"{line} ({lines.attrs[line]})")
+    plt.yscale("log"); plt.xlabel("time [μs]"); plt.ylabel("emission [photons / s]"); plt.legend()
     plt.show()
     return
 
@@ -218,14 +223,14 @@ def _():
 
 
 @app.cell
-def _(Dye, plot_emission, plt, pulse, rebop_time_resolved, rsim):
-    for molecules in [20, 2000]:
+def _(Rhodamine, laser, plt, rebop_time_resolved, rsim):
+    for molecules in [1, 1000]:
         run = rebop_time_resolved(
-            rsim.with_values({Dye.S0: molecules}), excitation=pulse, rng=3
+            rsim.with_values({Rhodamine.S0: molecules}), excitation=laser, rng=3
         )
-        plot_emission(run / molecules, label=f"{molecules} molecules")
-    plt.ylabel("emission per molecule [photons / s]")
-    plt.legend()
+        run = run["emission"].pint.dequantify().coarsen(time=100, boundary="trim").mean()
+        plt.plot(run.time, run / molecules, label=f"N = {molecules}")
+    plt.xlabel("time [μs]"); plt.ylabel("emission per molecule [photons / s]"); plt.legend()
     plt.show()
     return
 
@@ -233,7 +238,7 @@ def _(Dye, plot_emission, plt, pulse, rebop_time_resolved, rsim):
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    With thousands of molecules the stochastic result is already close to the ODE one, which is much faster to compute. Stochastic simulation is worth it when few molecules (or few photons) are involved, and to estimate how noisy a measurement on such a system will be. The Gillespie algorithm simulates every single event, so its cost grows with the number of molecules and of excitations.
+    With a thousand molecules the blinking of each one is averaged out and the stochastic result is already close to the ODE one, which is much faster to compute. Stochastic simulation is worth it when few molecules (or few photons) are involved, and to estimate how noisy a measurement on such a system will be. The Gillespie algorithm simulates every single event, so its cost grows with the number of molecules and of excitations.
     """)
     return
 

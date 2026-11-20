@@ -22,9 +22,9 @@ async with app.setup(hide_code=True):
 def _():
     mo.md(r"""
     # Emission, absorption and quantum yield
-    Besides the populations of each level, jablonski can compute what is measured in a spectroscopy experiment: emitted and absorbed photons over time, steady-state spectra and quantum yields. This notebook goes through these tools. If you are new to jablonski start with [Getting Started with Jablonski](https://dyscolab.github.io/static_notebooks/getting_started_with_jablonski.html).
+    Besides the populations of each level, jablonski can compute the observables from spectroscopy experiments: emitted and absorbed photons over time, steady-state spectra and quantum yields. This notebook goes through these tools. If you are new to jablonski start with [Getting Started with Jablonski](https://dyscolab.github.io/static_notebooks/getting_started_with_jablonski.html).
 
-    We use a simplified model of ruthenium tris(bipyridine) (https://doi.org/10.1016/j.ccr.2020.213758), with two absorptions: one into the singlet metal-to-ligand charge transfer state (MLCT), and one into a higher ligand-centred state (LC), which quickly relaxes to the MLCT. The singlet MLCT fluoresces weakly and crosses to the triplet MLCT, which phosphoresces.
+    As an example system we use a simplified model of ruthenium tris(bipyridine) (https://doi.org/10.1016/j.ccr.2020.213758), with two absorptions: one into the singlet metal-to-ligand charge transfer state (MLCT), and one into a higher ligand-centred state (LC), which quickly relaxes to the MLCT. The singlet MLCT fluoresces weakly and crosses to the triplet MLCT, which phosphoresces.
     """)
     return
 
@@ -67,9 +67,10 @@ def _():
     sim = Simulator(Ruthenium)
     notebook_report(Ruthenium)
     return (
-        IntersystemCrossing,
         Absorption,
         Fluorescence,
+        IntersystemCrossing,
+        Phosphorescence,
         ReverseIntersystemCrossing,
         Ruthenium,
         Simulator,
@@ -77,6 +78,7 @@ def _():
         SpectroscopicSystem,
         TripletState,
         initial,
+        notebook_report,
         np,
         plt,
         sim,
@@ -123,14 +125,14 @@ def _(Ruthenium, u):
     pulse = pulse_excitation({Ruthenium.abs: 1e23 / (u.cm**2 * u.s)}, width=2 * u.us)
     delta = delta_excitation(Ruthenium.abs, area=1e17 / u.cm**2)
     pulse
-    return delta, pulse, step
+    return delta, pulse
 
 
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
     ## Time-resolved simulations
-    Time-resolved functions take the times to save at from the simulator, set with `with_times(save_at=...)` (for the difference between `save_at` and `t_span`, see [Simulation](https://dyscolab.github.io/static_notebooks/simulation.html)). `piecewise(sim, events)` simulates the populations of each level. It splits the simulation at every event and integrates from the first to the last time of `save_at`.
+    Time-resolved functions take the times to save at from the simulator, set with `with_times(save_at=...)` (simulation times are also controlled by `t_span`, for the difference between `save_at` and `t_span`, see [Simulation](https://dyscolab.github.io/static_notebooks/simulation.html)). `piecewise(sim, events)` simulates the populations of each level. It splits the simulation at every event and integrates from the first to the last time of `save_at`.
     """)
     return
 
@@ -210,7 +212,7 @@ def _(cw, sim):
 
 @app.cell
 def _(cw, sim, steady_state):
-    steady_state(sim, cw)["emission"].values
+    steady_state(sim, cw)["emission"].data
     return
 
 
@@ -331,7 +333,7 @@ def _(sim, u):
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    `excitation_spectra(sim, emission, height)` takes one emission wavelength of that matrix (the nearest line to `emission`), giving the emission at that wavelength for each absorption. Here the LC absorption gives more phosphorescence because its cross-section is larger.
+    `excitation_spectra(sim, emission, height)` takes one emission wavelength of that matrix (the nearest line to `emission`), giving the emission at that wavelength for each absorption.
     """)
     return
 
@@ -356,10 +358,10 @@ def _(cw, sim):
     from jablonski.simulation import quantum_yield, spectral_quantum_yield
 
     {
-        kind: quantum_yield(sim, cw, kind=kind).values.item()
+        kind: quantum_yield(sim, cw, kind=kind).pint.to("percent").data.item()
         for kind in ["emission", "fluorescence", "phosphorescence"]
     }
-    return quantum_yield, spectral_quantum_yield
+    return (spectral_quantum_yield,)
 
 
 @app.cell(hide_code=True)
@@ -379,7 +381,17 @@ def _(cw, sim, spectral_quantum_yield):
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    In this model every transition is linear in the populations, so the quantum yield doesn't depend on how hard we pump. That is not true when two excited molecules interact. In triplet-triplet annihilation upconversion a sensitizer absorbs light, crosses to its triplet and transfers it to an annihilator. Two annihilator triplets then annihilate into an excited singlet, which fluoresces at a higher energy than the light absorbed. The transfer between both molecules, $\text{sens.T1} + \text{ann.S0} \rightarrow \text{sens.S0} + \text{ann.T1}$, has the form of `EnergyTransferUpconversion`, which describes any energy transfer between two molecules.
+    In this model every transition is linear in the populations, so the quantum yield doesn't depend on how hard we pump. That is not true when two excited molecules interact, as in triplet-triplet annihilation upconversion. There light is absorbed by a sensitizer, which quickly crosses to its triplet $T_1$. The sensitizer can't emit at higher energy on its own; instead it hands its triplet to a second molecule, the annihilator, and returns to its ground state:
+
+    $$\text{sens.T1} + \text{ann.S0} \rightarrow \text{sens.S0} + \text{ann.T1}.$$
+
+    This triplet energy transfer is modelled with `EnergyTransferUpconversion`, which describes any energy transfer from an excited molecule (`sensitizer_high` → `sensitizer_low`) to another one (`activator_low` → `activator_high`), with a rate proportional to `sens.T1 * ann.S0`.
+
+    The annihilator triplets are long-lived, so they accumulate. When two of them meet they annihilate: one goes back to the ground state and gives its energy to the other, which ends up in the excited singlet $S_1$:
+
+    $$\text{ann.T1} + \text{ann.T1} \rightarrow \text{ann.S1} + \text{ann.S0}.$$
+
+    This step is modelled with `TripletTripletAnnihilation`, here passing the same triplet twice, and its rate is proportional to `ann.T1 * ann.T1`. The annihilator $S_1$ (3.0 eV) lies above the energy of the absorbed photons (2.3 eV), so its fluorescence is upconverted. Since two triplets are needed for each upconverted photon, the upconversion depends nonlinearly on the excitation.
     """)
     return
 
@@ -430,6 +442,7 @@ def _(
             activator_high=ann.T1,
             rate=1e5 / u.s,
         )
+        # Triplet-triplet annihilation: ann.T1 + ann.T1 -> ann.S1 + ann.S0
         tta = TripletTripletAnnihilation(
             triplet_1=ann.T1,
             triplet_2=ann.T1,
@@ -470,7 +483,84 @@ def _(Simulator, Upconversion, np, plt, u):
 def _():
     mo.md(r"""
     `sweeps.sweep_spectra` and `sweeps.sweep_spectral_steady_state` sweep spectra and steady-state lines in the same way (see [Getting Started with Jablonski](https://dyscolab.github.io/static_notebooks/getting_started_with_jablonski.html) for an example).
+    """)
+    return
 
+
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""
+    ## Constant ground states
+    Under weak excitation only a tiny fraction of the molecules is excited at any time, so the ground state population barely changes. In that case it can be modelled with `ConstantGroundState(default, energy=0)`, a level whose population stays constant. It is a `Parameter` with an `energy` (in eV if it is a plain number) and can replace a singlet or triplet state in any transition. It has no equation of its own, so `ground` appears in the parameters of the report below, not in the variables, and its population can be changed with `with_values` like any other parameter.
+
+    Here is the ruthenium model from the beginning with a constant ground state (leaving out the LC absorption, which we didn't pump):
+    """)
+    return
+
+
+@app.cell
+def _(
+    Absorption,
+    Fluorescence,
+    IntersystemCrossing,
+    Phosphorescence,
+    ReverseIntersystemCrossing,
+    SingletState,
+    SpectroscopicSystem,
+    TripletState,
+    initial,
+    notebook_report,
+    u,
+):
+    from jablonski import ConstantGroundState
+
+    class DiluteRuthenium(SpectroscopicSystem):
+        ground = ConstantGroundState(default=10)
+        MLCT_3: TripletState = initial(2.12 * u.eV, "triplet", default=0)
+        MLCT_1: SingletState = initial(2.74 * u.eV, default=0)
+
+        abs = Absorption(ground=ground, excited=MLCT_1, rate=5.6e-17 * u.cm**2)
+        fl = Fluorescence(excited=MLCT_1, ground=ground, rate=1e8 / u.s)
+        isc = IntersystemCrossing(source=MLCT_1, target=MLCT_3, rate=1 / (1 * u.ps))
+        ph = Phosphorescence(excited=MLCT_3, ground=ground, rate=1 / (0.6 * u.us) * 0.04)
+        risc = ReverseIntersystemCrossing(
+            source=MLCT_3, target=ground, rate=1 / (0.6 * u.us) * 0.96
+        )
+
+    notebook_report(DiluteRuthenium)
+    return (DiluteRuthenium,)
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""
+    Comparing the steady-state emission of both models shows when the approximation holds. At low flux they agree, while at high flux a significant part of the molecules sits in the long-lived triplet, the real ground state is depleted and the emission saturates. The constant ground state ignores this and keeps growing linearly:
+    """)
+    return
+
+
+@app.cell
+def _(DiluteRuthenium, Ruthenium, Simulator, np, plt, steady_state, u):
+    saturation_fluxes = np.logspace(19, 24, 20) / (u.cm**2 * u.s)
+    for _model in [Ruthenium, DiluteRuthenium]:
+        _sim = Simulator(_model)
+        _emission = [
+            steady_state(_sim, {_model.abs: flux})["emission"].pint.magnitude.item()
+            for flux in saturation_fluxes
+        ]
+        plt.plot(saturation_fluxes.magnitude, _emission, label=_model.__name__)
+    plt.xscale("log")
+    plt.yscale("log")
+    plt.xlabel("Photon flux [1 / (cm² s)]")
+    plt.ylabel("Emission [photons / s]")
+    plt.legend()
+    plt.show()
+    return
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""
     ## Next steps
     - [Fitting spectroscopic data](https://dyscolab.github.io/static_notebooks/fitting_spectroscopic_data.html): fit model parameters to measured time-resolved emission and spectra.
     - [Stochastic photon counting](https://dyscolab.github.io/static_notebooks/stochastic_photon_counting.html): simulate individual photon counts instead of average rates.

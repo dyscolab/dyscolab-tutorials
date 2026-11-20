@@ -97,7 +97,7 @@ def _():
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    To simulate it we must create a `Simulator` for it. We will simulate this model more than once, so we store the times at which the solution is saved on the simulator with `with_times()`. Every call to `solve()` then uses them. For a model simulated only once, the times can be passed directly as `solve(save_at=...)`, as we do in the next section. The difference between `save_at` and `t_span` is explained in [Simulation](https://dyscolab.github.io/static_notebooks/simulation.html).
+    To simulate it we must create a `Simulator` for it. We will simulate this model more than once, so we store the times at which the solution is saved on the simulator with `with_times()`. Every call to `solve()` then uses them. For a model simulated only once, the times can be passed directly as `solve(save_at=...)`, as we do in the next section. Simulation times are also controlled by `t_span`; the difference between `save_at` and `t_span` is explained in [Simulation](https://dyscolab.github.io/static_notebooks/simulation.html).
     """)
     return
 

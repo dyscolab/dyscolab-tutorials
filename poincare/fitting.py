@@ -7,7 +7,7 @@
 
 import marimo
 
-__generated_with = "0.24.2"
+__generated_with = "0.23.16"
 app = marimo.App(width="medium")
 
 async with app.setup(hide_code=True):
@@ -33,8 +33,8 @@ def _():
 
     - `make_target` builds the data to fit in the same format as simulation results.
     - `fit_result` fits one time course.
-    - `Fitter` fits several experiments at once, with shared parameters.
     - `fit_steady_state` fits steady states measured at different parameter values.
+    - `Fitter` fits several experiments at once, with shared parameters.
 
     All of them use [`scipy.optimize.least_squares`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.least_squares.html) and return the best values together with their covariance.
     """)
@@ -75,6 +75,7 @@ def _():
         spring = vx.derive() << -(omega**2) * x
 
     return (
+        Derivative,
         Oscillator,
         Parameter,
         Simulator,
@@ -261,40 +262,149 @@ def _(Oscillator, fit_result, make_target, np, omega_real, sim, t, target):
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
+    ## Fitting steady states
+    Sometimes the data are not time courses but steady states measured for different values of a parameter (or initial condition). `fit_steady_state` compares the data with a `SteadyState.sweep` over that parameter (see [Asymptotic behaviour](https://dyscolab.github.io/static_notebooks/asymptotic_behaviour.html)).
+
+    As an example, take a mass `m` hanging from a spring of stiffness `k`, with a damping `c`. Measuring the position `x` downwards from the rest length of the spring, the equation of motion is $m \ddot{x} = m g - k x - c \dot{x}$, and the mass comes to rest at $x = m g / k$:
+    """)
+    return
+
+
+@app.cell
+def _(
+    Derivative,
+    Parameter,
+    Simulator,
+    System,
+    Variable,
+    assign,
+    initial,
+    solvers,
+):
+    class HangingSpring(System):
+        x: Variable = initial(default=0)
+        v: Derivative = x.derive(initial=0)
+
+        m: Parameter = assign(default=1)
+        k: Parameter = assign(default=1)
+        c: Parameter = assign(default=1)
+        g: Parameter = assign(default=9.81)
+
+        eq = v.derive() << g - (k * x + c * v) / m
+
+    sim_spring = Simulator(HangingSpring).with_solver(
+        solvers.LSODA(rtol=1e-10, atol=1e-12)
+    )
+    return HangingSpring, sim_spring
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""
+    We hang several masses and measure where each one comes to rest. The target is a `Dataset` whose coordinate is the swept parameter, in the same format as the output of `SteadyState.sweep`:
+    """)
+    return
+
+
+@app.cell
+def _(np, rng):
+    import xarray as xr
+
+    masses = np.array([0.5, 1.0, 2.0, 4.0])
+    k_real = 4.0  # "Actual" stiffness
+    x_rest = masses * 9.81 / k_real + rng.normal(0, 0.02, masses.size)
+
+    target_steady = xr.Dataset(
+        {"x": xr.DataArray(x_rest, dims="m", coords={"m": masses})}
+    )
+    target_steady
+    return k_real, masses, target_steady
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""
+    `fit_steady_state` takes the simulator, a `SteadyState` instance, the parameter that was varied and the target, plus `p0`, `scale` and `sigma` as in `fit_result`:
+    """)
+    return
+
+
+@app.cell
+def _(HangingSpring, sim_spring, target_steady):
+    from poincare import SteadyState
+    from poincare.analysis import fit_steady_state
+
+    fit_steady = fit_steady_state(
+        sim_spring,
+        SteadyState(),
+        HangingSpring.m,
+        target_steady,
+        p0={HangingSpring.k: (1.0, 1e-3, 100)},
+    )
+    fit_steady
+    return (SteadyState,)
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""
     ## Fitting several experiments at once
-    Often a parameter is measured in several experiments, for example with different initial conditions. The `Fitter` class fits all of them at once, with the same values for the fitted parameters. It takes:
+    Often parameters are measured in several experiments, for example with different initial conditions, or some as time courses and others as steady states. The `Fitter` class fits all of them at once, with the same values for the fitted parameters. It takes:
 
     - the `Simulator`,
     - a list of simulation functions, one per experiment. Each takes the simulator (with the parameters being tried) and returns a result comparable to its target, so it is where each experiment's times and conditions are set,
     - a list of targets,
     - `p0`, as in `fit_result`, and optionally `scales` and `sigma` (one per target).
 
-    As a second experiment, we start the oscillator from `x = 3` and measure for a shorter time:
+    The resting positions above tell us the stiffness `k`, but nothing about the damping `c`. To measure it, we release a mass of 1 from the rest length of the spring and record how it rings down:
     """)
     return
 
 
 @app.cell
-def _(Oscillator, make_target, np, omega_real, rng):
-    x0_b = 3
-    t_b = np.linspace(0, 5, 30)
-    x_data_b = x0_b * np.cos(omega_real * t_b) + rng.normal(0, 0.05, t_b.size)
-    target_b = make_target({Oscillator.x: x_data_b}, save_at=t_b)
-    return t_b, target_b, x0_b
+def _(HangingSpring, k_real, make_target, np, plt, rng, sim_spring):
+    c_real = 0.8  # "Actual" damping
+    t_ring = np.linspace(0, 15, 60)
+    _true = sim_spring.with_values(
+        {HangingSpring.k: k_real, HangingSpring.c: c_real}
+    ).solve(save_at=t_ring)
+    x_ring = _true["x"].to_numpy() + rng.normal(0, 0.02, t_ring.size)
+    target_ring = make_target({HangingSpring.x: x_ring}, save_at=t_ring)
+
+    plt.plot(t_ring, x_ring, ".", label="x")
+    plt.xlabel("time")
+    plt.legend()
+    return t_ring, target_ring
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""
+    We fit `k` and `c` to both experiments: the ring-down is compared with a simulation at the measured times, and the resting positions with a steady state sweep over the masses:
+    """)
+    return
 
 
 @app.cell
-def _(Oscillator, omega_real, sim, t, t_b, target, target_b, x0_b):
+def _(
+    HangingSpring,
+    SteadyState,
+    masses,
+    sim_spring,
+    t_ring,
+    target_ring,
+    target_steady,
+):
     from poincare.analysis import Fitter
 
     fitter = Fitter(
-        sim,
+        sim_spring,
         [
-            lambda sim: sim.solve(save_at=t),
-            lambda sim: sim.with_values({Oscillator.x: x0_b}).solve(save_at=t_b),
+            lambda sim: sim.solve(save_at=t_ring),
+            lambda sim: SteadyState().sweep(sim, variable=HangingSpring.m, values=masses),
         ],
-        [target, target_b],
-        p0={Oscillator.omega: (omega_real * 1.1, 0, 10)},
+        [target_ring, target_steady],
+        p0={HangingSpring.k: (1.0, 1e-3, 100), HangingSpring.c: (None, 0, 10)},
     )
     fit_both = fitter.fit()
     fit_both
@@ -310,81 +420,8 @@ def _():
 
 
 @app.cell
-def _(Oscillator, fitter):
-    fitter.fit(p0={Oscillator.omega: (1.8, 0, 10)})
-    return
-
-
-@app.cell(hide_code=True)
-def _():
-    mo.md(r"""
-    ## Fitting steady states
-    Sometimes the data are not time courses but steady states measured for different values of a parameter (or initial condition). `fit_steady_state` compares the data with a `SteadyState.sweep` over that parameter (see [Asymptotic behaviour](https://dyscolab.github.io/static_notebooks/asymptotic_behaviour.html)).
-
-    As an example, take a species produced at rate `k_in` and degraded at rate `k_out * x`, whose steady state is $x = k_{in} / k_{out}$:
-    """)
-    return
-
-
-@app.cell
-def _(Parameter, Simulator, System, Variable, assign, initial, solvers):
-    class Turnover(System):
-        x: Variable = initial(default=0)
-        k_in: Parameter = assign(default=1)
-        k_out: Parameter = assign(default=1)
-
-        eq = x.derive() << k_in - k_out * x
-
-    sim_turnover = Simulator(Turnover).with_solver(
-        solvers.LSODA(rtol=1e-10, atol=1e-12)
-    )
-    return Turnover, sim_turnover
-
-
-@app.cell(hide_code=True)
-def _():
-    mo.md(r"""
-    The target is a `Dataset` whose coordinate is the swept parameter, in the same format as the output of `SteadyState.sweep`:
-    """)
-    return
-
-
-@app.cell
-def _(np, rng):
-    import xarray as xr
-
-    k_in_values = np.array([0.5, 1.0, 2.0, 4.0])
-    k_out_real = 0.5
-    x_steady = k_in_values / k_out_real + rng.normal(0, 0.02, k_in_values.size)
-
-    target_steady = xr.Dataset(
-        {"x": xr.DataArray(x_steady, dims="k_in", coords={"k_in": k_in_values})}
-    )
-    target_steady
-    return (target_steady,)
-
-
-@app.cell(hide_code=True)
-def _():
-    mo.md(r"""
-    `fit_steady_state` takes the simulator, a `SteadyState` instance, the parameter that was varied and the target, plus `p0`, `scale` and `sigma` as in `fit_result`:
-    """)
-    return
-
-
-@app.cell
-def _(Turnover, sim_turnover, target_steady):
-    from poincare import SteadyState
-    from poincare.analysis import fit_steady_state
-
-    fit_steady = fit_steady_state(
-        sim_turnover,
-        SteadyState(),
-        Turnover.k_in,
-        target_steady,
-        p0={Turnover.k_out: (1.0, 1e-3, 10)},
-    )
-    fit_steady
+def _(HangingSpring, fitter):
+    fitter.fit(p0={HangingSpring.k: (3.0, 1e-3, 100), HangingSpring.c: (0.5, 0, 10)})
     return
 
 
@@ -427,7 +464,7 @@ def _():
 
     - a parameter ended at one of its bounds: widen the bounds, or check if the model or initial guess is right,
     - there are not enough data points to estimate the noise when no `sigma` is given: add data or pass `sigma`,
-    - some parameters are not determined separately by the data. For example, if only the product `a * b` enters the model, any pair with the same product fits equally well:
+    - some parameters are not determined separately by the data. For example, a capacitor `C` discharging through a resistor `R` depends only on the product `R * C`, so any pair with the same product fits equally well:
     """)
     return
 
@@ -447,25 +484,25 @@ def _(
     solvers,
     warnings,
 ):
-    class Decay(System):
-        x: Variable = initial(default=2.0)
-        a: Parameter = assign(default=1.0)
-        b: Parameter = assign(default=0.5)
+    class RCCircuit(System):
+        V: Variable = initial(default=5.0)
+        R: Parameter = assign(default=1.0)
+        C: Parameter = assign(default=0.5)
 
-        eq = x.derive() << -a * b * x
+        eq = V.derive() << -V / (R * C)
 
     _t = np.linspace(0, 5, 20)
-    _target = make_target({Decay.x: 2 * np.exp(-0.5 * _t)}, save_at=_t)
+    _target = make_target({RCCircuit.V: 5 * np.exp(-_t / 0.5)}, save_at=_t)
 
     with warnings.catch_warnings(record=True) as caught_cov:
         warnings.simplefilter("always")
-        fit_decay = fit_result(
-            Simulator(Decay).with_solver(solvers.LSODA(rtol=1e-10, atol=1e-12)),
+        fit_rc = fit_result(
+            Simulator(RCCircuit).with_solver(solvers.LSODA(rtol=1e-10, atol=1e-12)),
             _target,
-            p0={Decay.a: 1.2, Decay.b: 0.4},
+            p0={RCCircuit.R: 1.2, RCCircuit.C: 0.4},
         )
 
-    print(fit_decay)
+    print(fit_rc)
     print(*[w.message for w in caught_cov if w.category is CovarianceWarning], sep="\n")
     return
 
@@ -473,7 +510,7 @@ def _(
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    The product `a * b` is well determined, but `a` and `b` separately are not. In this case, fix one parameter of each group (leave it out of `p0`), or add data that distinguishes them, for example another experiment fitted together with `Fitter`.
+    The product `R * C` is well determined, but `R` and `C` separately are not. In this case, fix one parameter of each group (leave it out of `p0`), or add data that distinguishes them, for example another experiment fitted together with `Fitter`.
     """)
     return
 

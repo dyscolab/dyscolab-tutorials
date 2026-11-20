@@ -24,11 +24,19 @@ def _():
 
     [SBML](https://sbml.org/) (Systems Biology Markup Language) is a standard file format to exchange models of biological systems. Thousands of published models are available in SBML from repositories such as [BioModels](https://www.ebi.ac.uk/biomodels/). SimBio can import an SBML model as a `System`, which is then simulated and analysed like any model written in Python.
 
-    SBML import needs two extra packages, `python-libsbml` and `biomodels`, which are installed with the `io` extra:
+    SBML import needs two extra packages, `python-libsbml` and `biomodels`, which are installed with the `io` extra of SimBio. With pip:
 
     ```sh
     pip install "simbio[io]"
     ```
+
+    With uv, use `uv pip install "simbio[io]"`, or `uv add "simbio[io]"` inside a uv project. With pixi, add it as a PyPI dependency:
+
+    ```sh
+    pixi add --pypi "simbio[io]"
+    ```
+
+    If you prefer conda packages, `python-libsbml` is also available on conda-forge (`pixi add python-libsbml`), while `biomodels` and `simbio` come from PyPI (`pixi add --pypi simbio biomodels`).
     """)
     return
 
@@ -40,17 +48,35 @@ def _():
 
     As a first example, we load a small model stored next to this notebook in `data/enzyme_pathway.xml`. A substrate `S` is supplied from a buffered `source`, converted into a product `P` by an enzyme with Michaelis-Menten kinetics, and `P` is degraded.
 
-    `simbio.io.sbml.load()` reads an SBML file from a path, and `simbio.io.sbml.loads()` reads it from a string. Here we read the text ourselves, so that the notebook also works when it runs in the browser, where the data folder is a URL instead of a local folder:
+    `simbio.io.sbml.load()` reads an SBML file from a path. `mo.notebook_dir()` is the folder that contains this notebook:
     """)
     return
 
 
 @app.cell
 def _():
+    from simbio.io import sbml
+
+    try:
+        model = sbml.load(mo.notebook_dir() / "data" / "enzyme_pathway.xml")
+        print(model)
+    except Exception as error:
+        print(f"Could not open the file: {error}")
+    return (sbml,)
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""
+    When the notebook runs in the browser (for example, in the marimo playground), the cell above fails: there is no local folder, the data files are served from a URL, and `load()` cannot open them. In that case we download the text ourselves and pass it to `simbio.io.sbml.loads()`, which reads an SBML model from a string. `mo.notebook_location()` gives the location of the notebook, which is a folder when running locally and a URL in the browser, so the code below works in both cases. We call the model `EnzymePathway` and use it in the rest of the notebook:
+    """)
+    return
+
+
+@app.cell
+def _(sbml):
     from pathlib import Path
     from urllib.request import urlopen
-
-    from simbio.io import sbml
 
     location = mo.notebook_location() / "data" / "enzyme_pathway.xml"
     if isinstance(location, Path):
@@ -63,7 +89,7 @@ def _():
 
     EnzymePathway = sbml.loads(text)
     print(EnzymePathway)
-    return EnzymePathway, sbml, text, urlopen
+    return EnzymePathway, text, urlopen
 
 
 @app.cell(hide_code=True)
@@ -71,7 +97,7 @@ def _():
     mo.md(r"""
     The result is a `System` class. Its components keep the ids they have in the SBML file, so they are accessed as `EnzymePathway.S`, `EnzymePathway.Vmax`, and so on. Species become variables, and SBML parameters and compartments become parameters.
 
-    We simulate it with a `Simulator`, as any other model. Since we will simulate it more than once, we store the times on the simulator with `with_times()` (see [Simulation](https://dyscolab.github.io/static_notebooks/simulation.html)):
+    We simulate it with a `Simulator`, as any other model.
     """)
     return
 
@@ -105,7 +131,7 @@ def _():
     mo.md(r"""
     ## Function definitions
 
-    SBML models can define functions in MathML and use them in rate laws. In this file the conversion rate is written with a function `michaelis_menten(vmax, km, s)`, defined as $\frac{v_{max}\, s}{k_m + s}$. On import, each call is replaced by the body of the function, as the report of the model shows:
+    To inspect the imported model and verify it against the original we can generate a report with the system's reactions, equations, variables and parameters using `notebook_report`.
     """)
     return
 
@@ -115,7 +141,7 @@ def _(EnzymePathway):
     from simbio import notebook_report
 
     notebook_report(EnzymePathway, level=3)
-    return (notebook_report,)
+    return
 
 
 @app.cell(hide_code=True)

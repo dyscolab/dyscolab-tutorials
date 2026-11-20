@@ -76,7 +76,7 @@ def _(np, sim):
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    When the same model is simulated several times (to compare parameter values, solvers, or to fit it to data), the times can be stored on the simulator with `with_times()`. Like `with_values()`, it returns a new `Simulator`, and `solve()` then uses the stored times:
+    When the same model is simulated several times, the times can be stored in the simulator with `with_times()`. Like `with_values()`, it returns a new `Simulator`, and `solve()` then uses the stored times:
     """)
     return
 

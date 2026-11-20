@@ -116,7 +116,7 @@ def _(Ruthenium):
     from jablonski.plots import notebook_report
 
     notebook_report(Ruthenium)
-    return (notebook_report,)
+    return
 
 
 @app.cell(hide_code=True)
@@ -423,7 +423,7 @@ def _():
 def _(excitation, sim_2):
     from jablonski.simulation import spectral_steady_state, steady_state
 
-    steady_state(sim_2, excitation=excitation)["emission"].values
+    steady_state(sim_2, excitation=excitation)["emission"].data
     return (spectral_steady_state,)
 
 
@@ -504,6 +504,37 @@ def _():
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
+    ## Checking rates
+    Jablonski contains a list of expected ranges for the rates of most transitions. To check them use `transitions.check_all(system: SpectroscopicSystem)`, which will raise a warning for every transition with a rate out of the expected range. Rates given as an expression of other parameters are not checked. For example, in the ruthenium model above:
+    """)
+    return
+
+
+@app.cell
+def _(Ruthenium):
+    import warnings
+
+    from jablonski.transitions import check_all
+
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        check_all(Ruthenium)
+
+    mo.md("\n".join(f"- {warning.message}" for warning in caught))
+    return
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""
+    The ranges are typical values, so a warning is a hint to double check the rate and its units, not necessarily an error.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""
     ## Other utilities
     Jablonski contains a number of other built-in classes to represent common photochemical transitions, found in `jablonski.transitions`, simulation tools, found in `jablonski.simulation` and `jablonski.sweeps` (see [Emission, absorption and quantum yield](https://dyscolab.github.io/static_notebooks/spectroscopic_simulations.html)), and graphical output tools, found in `jablonski.plots`. Transitions and graphical tools are listed below. Since Jablonski is an extension of poincare most poincare utilities are also valid with jablonski and systems can interoperate (i.e. a system can be defined partly by transitions and partly by explicit ODEs). For more information see [poincare's documentation](https://dyscolab.github.io/poincare/#documentation).
 
@@ -539,55 +570,7 @@ def _():
     $$
 
     ### Constant ground states
-    `ConstantGroundState(default, energy=0)` is a level whose population stays constant, for example a ground state that is so much more populated than the excited states that its depletion can be neglected. It is a `Parameter` with an `energy` (in eV if it is a plain number) and can replace a singlet or triplet state in any transition. It has no equation of its own (so `ground` appears in the parameters of the report below, not in the variables), and its population can be changed with `with_values` like any other parameter.
-    """)
-    return
-
-
-@app.cell
-def _(SpectroscopicSystem, initial, notebook_report, u):
-    from jablonski import ConstantGroundState
-    from jablonski.transitions import Absorption as _Absorption
-    from jablonski.transitions import Fluorescence as _Fluorescence
-
-    class Dye(SpectroscopicSystem):
-        ground = ConstantGroundState(default=10)
-        S1 = initial(2.5 * u.eV, "singlet", default=0)
-
-        abs = _Absorption(ground=ground, excited=S1, rate=1e-16 * u.cm**2)
-        fl = _Fluorescence(excited=S1, ground=ground, rate=1 / (5 * u.ns))
-
-    notebook_report(Dye)
-    return
-
-
-@app.cell(hide_code=True)
-def _():
-    mo.md(r"""
-    ### Checking rates
-    Jablonski contains a list of expected ranges for the rates of most transitions. To check them use `transitions.check_all(system: SpectroscopicSystem)`, which will raise a warning for every transition with a rate out of the expected range. Rates given as an expression of other parameters are not checked. For example, in the ruthenium model above:
-    """)
-    return
-
-
-@app.cell
-def _(Ruthenium):
-    import warnings
-
-    from jablonski.transitions import check_all
-
-    with warnings.catch_warnings(record=True) as caught:
-        warnings.simplefilter("always")
-        check_all(Ruthenium)
-
-    mo.md("\n".join(f"- {warning.message}" for warning in caught))
-    return
-
-
-@app.cell(hide_code=True)
-def _():
-    mo.md(r"""
-    The ranges are typical values, so a warning is a hint to double check the rate and its units, not necessarily an error.
+    A ground state whose population stays constant can be modelled with `ConstantGroundState`, see [Emission, absorption and quantum yield](https://dyscolab.github.io/static_notebooks/spectroscopic_simulations.html#constant-ground-states).
 
     ### Graphical output
 
