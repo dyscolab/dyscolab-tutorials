@@ -21,7 +21,7 @@ async with app.setup(hide_code=True):
 def _():
     mo.md(r"""
     # Using volume in simbio
-    Simbio has the ability to keep track of a model's volume and whether variables represent concentrations or absolute amounts, varying equations accordingly. To use it we create a `Compartment`, which is similar to a `System` but it reacts to volume, and use `Species` instead of `Variable`.
+    SimBio has the ability to keep track of a model's volume and whether variables represent concentrations or absolute amounts, varying equations accordingly. To use it we create a `Compartment`, which is similar to a `System` but it reacts to volume, and use `Species` instead of `Variable`.
     """)
     return
 
@@ -67,7 +67,7 @@ def _():
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    Let's unpack all this: we created a `Compartment` called model and assinged to it a `Volume` named `V`. Inside `Model` we have 3 species: `A` and `AB`, which represent concentrations, and `B` which represents an absolute amount; their units are set accordingly. When we create the `RateLaw` simbio will take this into account, so the equations equivalent to r1 would be:
+    Let's unpack all this: we created a `Compartment` called model and assinged to it a `Volume` named `V`. Inside `Model` we have 3 species: `A` and `AB`, which represent concentrations, and `B` which represents an absolute amount; their units are set accordingly. When we create the `RateLaw` SimBio will take this into account, so the equations equivalent to r1 would be:
     $$\frac{dA}{dt} = -2 $$
     $$\frac{dB}{dt} =  -2V$$
     $$\frac{dAB}{dt} =  2$$
@@ -221,7 +221,7 @@ def _():
     mo.md(r"""
     ## Compartments and composition
 
-     Poincare and simbio allow for the composition fo smaller models to make more complex ones; to learn more about this see the correspoinding tutorial in [poincare's documentation](https://dyscolab.github.io/poincare/). A `Compartment` can be composed into other models, but it has its quirks. `System` can represent either a logical units, when external variables are passed to it and it is used to assign interactions to them, or a physical units, when it is instantiated without external variables and let to it create its own. Since compartments are meant to represent physical compartments with a volume and a certain amount or concentration of different species it only ever makes sense to instantiate them as physiscal units. To ensure this the linking of internal `Species` or `Volume` to external `Species` or `Volume` is disallowed
+     Poincare and SimBio allow for the composition fo smaller models to make more complex ones; to learn more about this see the correspoinding tutorial in [Poincare's documentation](https://dyscolab.github.io/poincare/). A `Compartment` can be composed into other models, but it has its quirks. `System` can represent either a logical units, when external variables are passed to it and it is used to assign interactions to them, or a physical units, when it is instantiated without external variables and let to it create its own. Since compartments are meant to represent physical compartments with a volume and a certain amount or concentration of different species it only ever makes sense to instantiate them as physiscal units. To ensure this the linking of internal `Species` or `Volume` to external `Species` or `Volume` is disallowed
     """)
     return
 

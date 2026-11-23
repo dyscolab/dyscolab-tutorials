@@ -394,7 +394,7 @@ def _(ParametrizedDecay, Simulator, np):
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    Besides `save_at`, `with_times()` and `solve()` also accept `t_span`, the interval over which the system is integrated. See [Simulation in poincare](https://dyscolab.github.io/static_notebooks/simulation.html) for the difference between the two.
+    Besides `save_at`, `with_times()` and `solve()` also accept `t_span`, the interval over which the system is integrated. See [Simulation in Poincare](https://dyscolab.github.io/static_notebooks/simulation.html) for the difference between the two.
     """)
     return
 
@@ -462,7 +462,7 @@ def _():
     mo.md(r"""
     ## Units
 
-    poincaré also supports units through
+    Poincare also supports units through
     [`pint`](https://github.com/hgrecco/pint)
     and [`pint-pandas`](https://github.com/hgrecco/pint-pandas).
     Variables, parameters and simulation times can be given with units:
@@ -489,7 +489,7 @@ def _(Derivative, Parameter, Simulator, System, Variable, assign, initial, np):
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    The columns of the result have units of `m` and `m/s`, respectively. See [Units in poincare](https://dyscolab.github.io/static_notebooks/units.html) for more on working with units.
+    The columns of the result have units of `m` and `m/s`, respectively. See [Units in Poincare](https://dyscolab.github.io/static_notebooks/units.html) for more on working with units.
     """)
     return
 

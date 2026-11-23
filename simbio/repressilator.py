@@ -21,7 +21,7 @@ async with app.setup(hide_code=True):
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    # Implementing the repressilator in Simbio
+    # Implementing the repressilator in SimBio
     The [repressilator](https://en.wikipedia.org/wiki/Repressilator) is a genetic regulatory network where 3 mRNA species $m_1$, $m_2$, $m_3$ interact with 3 proteins $p_1$, $p_2$, $p_3$. We can model it using the equations:
 
     $$
@@ -38,7 +38,7 @@ def _():
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    Simbio is desinged with composability in mind, so we can break this down into parts and combine them later:
+    SimBio is desinged with composability in mind, so we can break this down into parts and combine them later:
     - Each $m_i$ is destroyed at a rate equal it itself.
     - Each $m_i$ is sinthesysed at a rate $\frac{\alpha}{1+p_{i+1}^n} + \alpha_0$.
     - Each $p_i$ is created at a rate equal $-\beta (p_i-m_i)$.
@@ -105,7 +105,7 @@ def _():
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    Since the `Destruction` class creates a `MassAction` the reaction will already be proportional to the concentration of $m_i$, so we can set rate = 1. Simbio requires all Variables which influence a reaction to be involved as reactants, so we include `p` as both a reactant and a product so it doesn't have any net effect.
+    Since the `Destruction` class creates a `MassAction` the reaction will already be proportional to the concentration of $m_i$, so we can set rate = 1. SimBio requires all Variables which influence a reaction to be involved as reactants, so we include `p` as both a reactant and a product so it doesn't have any net effect.
     """)
     return
 
@@ -304,7 +304,7 @@ def _(result_2):
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    For more information on `Oscillations` and other methods see poincare's notebook on [asymptotic behaviour and parameter sweeps](https://colab.research.google.com/github/dyscolab/poincare/blob/main/docs/Asymptotic_behaviour.ipynb).
+    For more information on `Oscillations` and other methods see Poincare's notebook on [asymptotic behaviour and parameter sweeps](https://colab.research.google.com/github/dyscolab/poincare/blob/main/docs/Asymptotic_behaviour.ipynb).
     """)
     return
 

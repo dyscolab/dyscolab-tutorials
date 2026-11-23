@@ -27,7 +27,7 @@ def _():
     - **Time resolved emission** (or absorption) after an excitation, with `fit_spectral_time_resolved`.
     - **Continuous wave (CW) spectra** under constant excitation, with `fit_spectra`.
 
-    Both are built on poincare's `Fitter`, which is explained in detail in the [fitting notebook](https://dyscolab.github.io/static_notebooks/fitting.html). It contains a more extensible fits API which can fit arbitrary simulations or combinations of multiple simulations. If you are new to jablonski, start with [Getting started with Jablonski](https://dyscolab.github.io/static_notebooks/getting_started_with_jablonski.html).
+    Both are built on Poincare's `Fitter`, which is explained in detail in the [fitting notebook](https://dyscolab.github.io/static_notebooks/fitting.html). It contains a more extensible fits API which can fit arbitrary simulations or combinations of multiple simulations. If you are new to Jablonski, start with [Getting started with Jablonski](https://dyscolab.github.io/static_notebooks/getting_started_with_jablonski.html).
 
     As an example we'll use 4CzIPN, a TADF (thermally activated delayed fluorescence) emitter used in OLEDs. The model has three levels and six transitions: absorption, fluorescence and internal conversion from $S_1$, intersystem crossing (ISC) $S_1 \rightarrow T_1$, RISC $T_1 \rightarrow S_1$, and a slow non-radiative decay of $T_1$ to the ground state (phosphorescence is negligible at room temperature). Uoyama et al. ([Nature 492, 234 (2012)](https://doi.org/10.1038/nature11687)) measured a photoluminescence quantum yield of 94% and a delayed lifetime of about 5 μs in toluene. The rates below are representative values that reproduce this behaviour.
     """)
@@ -228,7 +228,7 @@ def _(
 def _():
     mo.md(r"""
     ## CW spectra
-    Under constant excitation the system reaches a steady state, and its spectrum is the photon rate of each emission line. `spectra` gives it as an xarray `DataArray` indexed by wavelength. Since jablonski lines don't have a shape, our model has a single line: the fluorescence at 506 nm.
+    Under constant excitation the system reaches a steady state, and its spectrum is the photon rate of each emission line. `spectra` gives it as an xarray `DataArray` indexed by wavelength. Since Jablonski lines don't have a shape, our model has a single line: the fluorescence at 506 nm.
 
     Its intensity is the number of photons absorbed per second times the quantum yield. The quantum yield depends on the rates we just fitted, so with them we can use the CW intensity under a known excitation to find the absorption cross section. As before, we make synthetic data with 3% noise:
     """)
@@ -293,7 +293,7 @@ def _():
     - `scale` weighs each line in the fit, for example `scale={"emission_fl": 2}` counts the fluorescence error twice as much.
     - Any other keyword argument is passed to [`scipy.optimize.least_squares`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.least_squares.html).
 
-    To fit several experiments together, for example decays measured with different excitation powers or a decay and a spectrum at once, use poincare's `Fitter` directly with one simulation function per experiment, as explained in the [fitting notebook](https://dyscolab.github.io/static_notebooks/fitting.html). The functions in `jablonski.simulation` can be used as simulation functions.
+    To fit several experiments together, for example decays measured with different excitation powers or a decay and a spectrum at once, use Poincare's `Fitter` directly with one simulation function per experiment, as explained in the [fitting notebook](https://dyscolab.github.io/static_notebooks/fitting.html). The functions in `jablonski.simulation` can be used as simulation functions.
     """)
     return
 

@@ -22,7 +22,7 @@ async with app.setup(hide_code=True):
 def _():
     mo.md(r"""
     # Emission, absorption and quantum yield
-    Besides the populations of each level, jablonski can compute the observables from spectroscopy experiments: emitted and absorbed photons over time, steady-state spectra and quantum yields. This notebook goes through these tools. If you are new to jablonski start with [Getting Started with Jablonski](https://dyscolab.github.io/static_notebooks/getting_started_with_jablonski.html).
+    Besides the populations of each level, Jablonski can compute the observables from spectroscopy experiments: emitted and absorbed photons over time, steady-state spectra and quantum yields. This notebook goes through these tools. If you are new to Jablonski start with [Getting Started with Jablonski](https://dyscolab.github.io/static_notebooks/getting_started_with_jablonski.html).
 
     As an example system we use a simplified model of ruthenium tris(bipyridine) (https://doi.org/10.1016/j.ccr.2020.213758), with two absorptions: one into the singlet metal-to-ligand charge transfer state (MLCT), and one into a higher ligand-centred state (LC), which quickly relaxes to the MLCT. The singlet MLCT fluoresces weakly and crosses to the triplet MLCT, which phosphoresces.
     """)

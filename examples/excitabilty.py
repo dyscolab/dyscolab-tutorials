@@ -109,7 +109,7 @@ def _(CellInteraction):
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    To get the refractory period we can use poincare's `Sweeper`  tool, which can do parameter sweeps and apply a custom function to analyze each run. We must first define the function.
+    To get the refractory period we can use Poincare's `Sweeper`  tool, which can do parameter sweeps and apply a custom function to analyze each run. We must first define the function.
     """)
     return
 
@@ -368,7 +368,7 @@ def _(np, plt, results):
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    For more information on poincare and other dyscolab libraries, including [SimBio](https://dyscolab.github.io/simbio/) for chemical reaction networks and [Jablonski](https://dyscolab.github.io/jablonski/) for photochemical systems, see the full [documentation](https://dyscolab.github.io/poincare/) on [dyscolab's homepage](https://dyscolab.github.io/).
+    For more information on Poincare and other dyscolab libraries, including [SimBio](https://dyscolab.github.io/simbio/) for chemical reaction networks and [Jablonski](https://dyscolab.github.io/jablonski/) for photochemical systems, see the full [documentation](https://dyscolab.github.io/poincare/) on [dyscolab's homepage](https://dyscolab.github.io/).
     """)
     return
 

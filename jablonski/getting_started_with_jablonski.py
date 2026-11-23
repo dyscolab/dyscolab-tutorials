@@ -22,7 +22,7 @@ async with app.setup(hide_code=True):
 def _():
     mo.md(r"""
     # Getting Started with Jablonski
-    Jablonski is a python library for simulating photochemical systems. It extends [poincare](https://dyscolab.github.io/poincare/), a package for modelling dynamical systems. To get started let's implement a simplified version of the ruthenium tris(bipyridine) model described in https://doi.org/10.1016/j.ccr.2020.213758.
+    Jablonski is a python library for simulating photochemical systems. It extends [Poincare](https://dyscolab.github.io/poincare/), a package for modelling dynamical systems. To get started let's implement a simplified version of the ruthenium tris(bipyridine) model described in https://doi.org/10.1016/j.ccr.2020.213758.
     """)
     return
 
@@ -142,7 +142,7 @@ def _():
     mo.md(r"""
     To simulate it we define a pulse with `pulse_excitation`. We give it a dictionary mapping each absorption to the height of the pulse, which represents photon flux so it must be in units of $1/(\text{distance}^2 \cdot \text{time})$, and a duration (`width`) and a `start`, which is 0 by default. Then we pass it to `piecewise` along with a `Simulator` for the system, on which we set the times to save at with `with_times`.
 
-    `piecewise` splits the simulation at each change of the excitation and integrates from the first to the last time in `save_at` (see [the difference between `save_at` and `t_span`](https://dyscolab.github.io/static_notebooks/simulation.html)). Storing the times on the simulator is the standard way when it is used more than once, since every jablonski simulation function takes them from there. They can also be passed to each function directly, as in `piecewise(sim, events=pulse, save_at=times)`.
+    `piecewise` splits the simulation at each change of the excitation and integrates from the first to the last time in `save_at` (see [the difference between `save_at` and `t_span`](https://dyscolab.github.io/static_notebooks/simulation.html)). Storing the times on the simulator is the standard way when it is used more than once, since every Jablonski simulation function takes them from there. They can also be passed to each function directly, as in `piecewise(sim, events=pulse, save_at=times)`.
     """)
     return
 
@@ -386,7 +386,7 @@ def _(plt, pulse_2, sim_2, time_resolved):
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    To get more realistic excitation we can use jablonski's helper functions. `pump_from_laser` allows us to calculate the resulting excitation with the molecule in the center of a gaussian beam of a certain width (as standard deviation), power, wavelength and linewidth.
+    To get more realistic excitation we can use Jablonski's helper functions. `pump_from_laser` allows us to calculate the resulting excitation with the molecule in the center of a gaussian beam of a certain width (as standard deviation), power, wavelength and linewidth.
     """)
     return
 
@@ -412,7 +412,7 @@ def _(Ru_Os, excitation, u):
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    Since jablonski doesn't support line profiles yet the linewidth is taken as a simple tolerance: anything within it is pumped at full power and anything outside is ignored.
+    Since Jablonski doesn't support line profiles yet the linewidth is taken as a simple tolerance: anything within it is pumped at full power and anything outside is ignored.
 
     Under continuous excitation `steady_state` gives the total emission once the populations stop changing, and `spectral_steady_state` gives it per line:
     """)
@@ -459,7 +459,7 @@ def _(excitation, np, plt, sim_2, u):
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    This can be combined with jablonski's sweep functions. We can get the emission spectra for different intensities by using `sweeps.sweep_spectra` with pumps for different laser powers.
+    This can be combined with Jablonski's sweep functions. We can get the emission spectra for different intensities by using `sweeps.sweep_spectra` with pumps for different laser powers.
     """)
     return
 
@@ -536,7 +536,7 @@ def _():
 def _():
     mo.md(r"""
     ## Other utilities
-    Jablonski contains a number of other built-in classes to represent common photochemical transitions, found in `jablonski.transitions`, simulation tools, found in `jablonski.simulation` and `jablonski.sweeps` (see [Emission, absorption and quantum yield](https://dyscolab.github.io/static_notebooks/spectroscopic_simulations.html)), and graphical output tools, found in `jablonski.plots`. Transitions and graphical tools are listed below. Since Jablonski is an extension of poincare most poincare utilities are also valid with jablonski and systems can interoperate (i.e. a system can be defined partly by transitions and partly by explicit ODEs). For more information see [poincare's documentation](https://dyscolab.github.io/poincare/#documentation).
+    Jablonski contains a number of other built-in classes to represent common photochemical transitions, found in `jablonski.transitions`, simulation tools, found in `jablonski.simulation` and `jablonski.sweeps` (see [Emission, absorption and quantum yield](https://dyscolab.github.io/static_notebooks/spectroscopic_simulations.html)), and graphical output tools, found in `jablonski.plots`. Transitions and graphical tools are listed below. Since Jablonski is an extension of Poincare most Poincare utilities are also valid with Jablonski and systems can interoperate (i.e. a system can be defined partly by transitions and partly by explicit ODEs). For more information see [Poincare's documentation](https://dyscolab.github.io/poincare/#documentation).
 
     ### Transitions
     - `Absorption(ground: SingletState, excited: SingletState, rate: Parameter, pump: Parameter)`: A molecule absorbs a photon and is promoted from its ground (or any lower) singlet state to an excited singlet state, $S_0 \rightarrow S_1$. The effective rate is `rate * pump`.

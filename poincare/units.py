@@ -30,7 +30,7 @@ async with app.setup(hide_code=True):
 def _():
     mo.md(r"""
     # Units in poincare
-    poincaré supports physical units through
+    Poincare supports physical units through
     [`pint`](https://github.com/hgrecco/pint).
     Variables, parameters and simulation times can be given as `pint` quantities,
     and the results of the simulation carry the corresponding units.
@@ -157,7 +157,7 @@ def _():
     ### Simulation times
 
     The times passed to the simulator must have the dimension of the independent variable,
-    which poincaré infers from the model if not given explicitly.
+    which Poincare infers from the model if not given explicitly.
     In the oscillator above, `x` is in `m` and its derivative `v` in `m/s`,
     so the independent variable is a time, which is the most common case.
     That is why `save_at` was given in seconds.

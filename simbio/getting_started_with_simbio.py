@@ -21,7 +21,7 @@ async with app.setup(hide_code=True):
 def _():
     mo.md(r"""
     # Getting started with SimBio
-    SimBio is a Python-based package for simulation of Chemical Reaction Networks (CRNs). It extends [poincare](https://dyscolab.github.io/poincare/), a package for modelling dynamical systems, to add functionality for CRNs.
+    SimBio is a Python-based package for simulation of Chemical Reaction Networks (CRNs). It extends [Poincare](https://dyscolab.github.io/poincare/), a package for modelling dynamical systems, to add functionality for CRNs.
     """)
     return
 
@@ -376,7 +376,7 @@ def _(Buffered):
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    `notebook_report()` takes the same options as poincare's reports (`transform`, `descriptions`, `replace_algebraics` and `sections`), and `model_report()` writes the report as a LaTeX document. See [Model reports](https://dyscolab.github.io/static_notebooks/getting_started_with_poincare.html#model-reports) in poincare's getting started for how to use them.
+    `notebook_report()` takes the same options as Poincare's reports (`transform`, `descriptions`, `replace_algebraics` and `sections`), and `model_report()` writes the report as a LaTeX document. See [Model reports](https://dyscolab.github.io/static_notebooks/getting_started_with_poincare.html#model-reports) in Poincare's getting started for how to use them.
     """)
     return
 
@@ -413,7 +413,7 @@ def _():
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    For more details into SimBio's capabilities, we recommend reading [poincare's documentation](https://dyscolab.github.io/poincare/).
+    For more details into SimBio's capabilities, we recommend reading [Poincare's documentation](https://dyscolab.github.io/poincare/).
     """)
     return
 

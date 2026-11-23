@@ -22,7 +22,7 @@ async with app.setup(hide_code=True):
 def _():
     mo.md(r"""
     # Stochastic simulations in SimBio
-    Simbio contains the capability to stochastically simulate systems using the [Gillespie algorithm](http://en.wikipedia.org/wiki/Gillespie_algorithm); this is preferable over ODE based simulations for reactions where small amounts of reactants are present. Simbio uses the [rebop](https://rebop.readthedocs.io/en/latest/) library for this, which must be installed separately:
+    SimBio contains the capability to stochastically simulate systems using the [Gillespie algorithm](http://en.wikipedia.org/wiki/Gillespie_algorithm); this is preferable over ODE based simulations for reactions where small amounts of reactants are present. SimBio uses the [rebop](https://rebop.readthedocs.io/en/latest/) library for this, which must be installed separately:
     ```bash
     pip install rebop
     ```
